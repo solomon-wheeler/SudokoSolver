@@ -67,35 +67,39 @@ class sudoku_board():
         for y_val in range(0,self.x_size):
             row_vals = []
             for x_val in range(0, self.x_size):  # checking whether the row is valid
-                this_val = self.board[y_val, x_val]
-                if this_val in row_vals:  # todo could be made more efficent?
-                    return False  # same values in row so this state invalid
-                row_vals.append(this_val)
+                this_val = int(self.board[y_val, x_val])
+                if this_val != 0: #0 represents an empty square, so we don't care if there are mutiple of these
+                    if this_val in row_vals:  # todo could be made more efficent?
+                        return False  # same values in row so this state invalid
+                    row_vals.append(this_val)
         for x_val in range(0,self.y_size):
             col_vals = []
             for y_val in range(0, self.y_size):  # checking whether the column is valid
-                this_val = self.board[y_val, x_val]
-                if this_val in col_vals:  # todo could be made more efficent?
-                    return False  # same values in column so this sate is invalid
-                col_vals.append(this_val)
+                this_val = int(self.board[y_val, x_val])
+                if this_val != 0:
+                    if this_val in col_vals:  # todo could be made more efficent?
+                        return False  # same values in column so this sate is invalid
+                    col_vals.append(this_val)
         x_bias = 0
         for y_bias in [0,3,6]:
             square_vals = []
             for y_val in range (0+ y_bias,3+ y_bias):
                 for x_val in range(0 + x_bias,3+x_bias):
-                    this_val = self.board[y_val, x_val]
-                    if this_val in square_vals:  # todo could be made more efficent?
-                        return False #same values in sqaure so this state is invalid
-                    square_vals.append(this_val)
+                    this_val = int(self.board[y_val, x_val])
+                    if this_val != 0:
+                        if this_val in square_vals:  # todo could be made more efficent?
+                            return False #same values in sqaure so this state is invalid
+                        square_vals.append(this_val)
         y_bias = 0
         for x_bias in [0,3,6]:
             square_vals = []
             for y_val in range(0 + y_bias, 3 + y_bias):
                 for x_val in range(0 + x_bias, 3 + x_bias):
                     this_val = self.board[y_val, x_val]
-                    if this_val in square_vals:  # todo could be made more efficent?
-                        return False  # same values in sqaure so this state is invalid
-                    square_vals.append(this_val)
+                    if this_val != 0:
+                        if this_val in square_vals:  # todo could be made more efficent?
+                            return False  # same values in sqaure so this state is invalid
+                        square_vals.append(this_val)
         return True
 
     def find_empty(self): #startin top left of the sudoko board looks through to find an empty square
