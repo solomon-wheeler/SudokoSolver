@@ -20,12 +20,12 @@ class sudoku_board():
     def get_board(self):
         return self.board
 
-    def check_solved(self):
-        for y_val in range(0, self.y_size):
-            for x_val in range(0, self.x_size):
-                if self.board[y_val][x_val] == 0:
-                    return False
-        return True
+    def check_solved(self): #for it to be correct is has to be full, and valid
+        if self.find_empty() == False: #i.e there are no empty spaces
+            if self.is_valid_overall() == True: #full thing is valid
+                return True
+        else:
+            return False
 
     def print_board(self):
         print(self.board)
@@ -34,6 +34,11 @@ class sudoku_board():
         row_vals = []
         col_vals = []
         square_vals = []
+        #debug only
+        if self.square_changed[0] == 7:
+            pass
+
+
         for x_val in range(0, self.x_size):  # checking whether the row is valid
             this_val = self.board[self.square_changed[0], x_val]
             if this_val != 0:
@@ -135,10 +140,10 @@ class sudoku_board():
 
 def go_for_this_square(next_state):
     ##for debugging
-    #print("current state of board:")
-    #next_state.print_board()
+    print("current state of board:")
+    next_state.print_board()
     if next_state.check_solved() == True:
-        return True
+        return next_state
     this_loops_start_state = next_state
     for new_value_to_try in range(1, 10):  # goes through all values from 1 - 9 inclusive
         trial_state = this_loops_start_state.create_new(new_value_to_try)
@@ -149,7 +154,7 @@ def go_for_this_square(next_state):
             lower_state = go_for_this_square(trial_state)
             if lower_state is not False and lower_state.check_solved():
                 return lower_state
-    trial_state.set_invalid()
+    trial_state.set_invalid() #todo check dont think this is correct
     return trial_state
 
 def boards_identical(program_board,solution_board): #check if two boards are the same
@@ -168,26 +173,50 @@ print("easy_puzzle.npy has been loaded into the variable sudoku")
 print(f"sudoku.shape: {sudoku.shape}, sudoku[0].shape: {sudoku[0].shape}, sudoku.dtype: {sudoku.dtype}")
 
 ## main
+##debug only
+debug = True
+if debug == True:
+    sudoku_to_check = 5
+    initial_sudoku_list = [sudoku_board(sudoku[5], [0,0])]
+
+    for this_board_to_solve in initial_sudoku_list:
+
+        if not this_board_to_solve.is_valid_overall():
+            this_board_to_solve.set_invalid()
+            returned_val = this_board_to_solve
+        else:
+            returned_val = go_for_this_square(this_board_to_solve)
+        print("Sudoku from program:")
+        returned_val.print_board()
+        print("Sudoku solution:")
+        print(solution[sudoku_to_check])
+        # todo if statement below for debugging
+        print(boards_identical(returned_val.get_board(),solution[sudoku_to_check]))
+
+        print("\n")
+
+else:
 
 
-initial_sudoku_list = []
-for this_sudoku_board in sudoku:
-    initial_sudoku_list.append(sudoku_board(this_sudoku_board, [0,0]))  # here we are creating the sudoku board class for our first board, and parsing in the numpy array of our first board
-counter = 0
-for this_board_to_solve in initial_sudoku_list:
+    ## actual main
+    initial_sudoku_list = []
+    for this_sudoku_board in sudoku:
+        initial_sudoku_list.append(sudoku_board(this_sudoku_board, [0,0]))  # here we are creating the sudoku board class for our first board, and parsing in the numpy array of our first board
+    counter = 0
+    for this_board_to_solve in initial_sudoku_list:
 
-    if not this_board_to_solve.is_valid_overall():
-        this_board_to_solve.set_invalid()
-        returned_val = this_board_to_solve
-    else:
-        returned_val = go_for_this_square(this_board_to_solve)
-    print("Sudoku from program:")
-    returned_val.print_board()
-    print("Sudoku solution:")
-    print(solution[counter])
-    # todo if statement below for debugging
-    print(boards_identical(returned_val.get_board(),solution[counter]))
+        if not this_board_to_solve.is_valid_overall():
+            this_board_to_solve.set_invalid()
+            returned_val = this_board_to_solve
+        else:
+            returned_val = go_for_this_square(this_board_to_solve)
+        print("Sudoku from program:")
+        returned_val.print_board()
+        print("Sudoku solution:")
+        print(solution[counter])
+        # todo if statement below for debugging
+        print(boards_identical(returned_val.get_board(),solution[counter]))
 
-    counter += 1
-    print("\n")
+        counter += 1
+        print("\n")
 
