@@ -34,14 +34,16 @@ class sudoku_board():
         square_vals = []
         for x_val in range (0,self.x_size ): #checking whether the row is valid
             this_val = self.board[self.square_changed[0], x_val]
-            if this_val in row_vals: #todo could be made more efficent?
-                return False # same values in row so this state invalid
-            row_vals.append(this_val)
+            if this_val !=0:
+                if this_val in row_vals: #todo could be made more efficent?
+                    return False # same values in row so this state invalid
+                row_vals.append(this_val)
         for y_val in range (0,self.y_size): #checking whether the column is valid
             this_val = self.board[y_val, self.square_changed[1]]
-            if this_val in col_vals:  # todo could be made more efficent?
-                return False #same values in column so this sate is invalid
-            col_vals.append(this_val)
+            if this_val !=0:
+                if this_val in col_vals:  # todo could be made more efficent?
+                    return False #same values in column so this sate is invalid
+                col_vals.append(this_val)
         # used to work out what square we are in, and check the locaitons in this square
         if 0 <= self.square_changed[0] <= 2:
             y_bias = 0
@@ -59,9 +61,10 @@ class sudoku_board():
         for y_val in range (0+ y_bias,3+ y_bias):
             for x_val in range(0 + x_bias,3+x_bias):
                 this_val = self.board[y_val, x_val]
-                if this_val in square_vals:  # todo could be made more efficent?
-                    return False #same values in sqaure so this state is invalid
-                square_vals.append(this_val)
+                if this_val !=0:
+                    if this_val in square_vals:  # todo could be made more efficent?
+                        return False #same values in sqaure so this state is invalid
+                    square_vals.append(this_val)
         return True
     def is_valid_overall(self):
         for y_val in range(0,self.x_size):
@@ -128,7 +131,7 @@ def go_for_this_square(next_state):
     if next_state.check_solved() == True:
         return True
     this_loops_start_state = next_state
-    for new_value_to_try in range(1, 9):
+    for new_value_to_try in range(1, 10): #goes through all values from 1 - 9 inclusive
         trial_state = this_loops_start_state.create_new(new_value_to_try)
         #trial_state.print_board()
         if trial_state.check_solved():
