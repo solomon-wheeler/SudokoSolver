@@ -18,11 +18,11 @@ def sudoku_solver(sudoku):
             self.x_size = 9
             self.square_changed = changed  # square that was changed to create this board
             self.dictionary_of_possible_values = possible_vals
-            self.overall_empty_squares = []
+            self.overall_empty_squares = last_empty_squares
+
 
         def get_board(self):
             return self.board
-
         def create_possible_values(
                 self):  # first time we run we are just finding all zeros and working out there possible values
             possible_empty_squares = []
@@ -145,7 +145,7 @@ def sudoku_solver(sudoku):
             for this_empty_location in possible_empty_squares:
                 string_location = str(this_empty_location[0]) + str(this_empty_location[1])
                 array_of_possible_values = self.dictionary_of_possible_values[string_location]
-                if len(array_of_possible_values) == 1:  # this is a singelton
+                if len(array_of_possible_values) == 1 or len(array_of_possible_values) == 2:  # this is a singelton/2 options todo make expalnaiton better
                     return this_empty_location
                 elif len(array_of_possible_values) < current_lowest_value[
                     0]:  # elif here for clarity will only run if other is false anyway
@@ -205,7 +205,7 @@ def sudoku_solver(sudoku):
                 return False
             new_board = np.copy(self.board)
             new_board[locations[0]][locations[1]] = value
-            return sudoku_board(new_board, locations, self.dictionary_of_possible_values)
+            return sudoku_board(new_board, locations, self.dictionary_of_possible_values,self.overall_empty_squares)
 
         def set_invalid(self):
             self.board = np.full((9, 9), -1)
@@ -232,7 +232,7 @@ def sudoku_solver(sudoku):
     ##debug only
 
     ## actual main
-    this_board_to_solve = sudoku_board(sudoku, [0, 0], {})
+    this_board_to_solve = sudoku_board(sudoku, [0, 0], {},[])
     this_board_to_solve.create_possible_values()
     if not this_board_to_solve.is_valid_overall():
         this_board_to_solve.set_invalid()
@@ -241,6 +241,15 @@ def sudoku_solver(sudoku):
         returned_val = go_for_this_square(this_board_to_solve)
 
     return returned_val.get_board()
+def create_3d_array(size):
+    overall_array = []
+    for y in range(0,size[0]):
+        this_array = []
+        for x in range(0,size[1]):
+            this_array.append([])
+        overall_array.append(this_array)
+    return overall_array
+
 
 
 ##test script
