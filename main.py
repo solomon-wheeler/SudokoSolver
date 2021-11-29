@@ -1,6 +1,7 @@
 import numpy as np
 import time
 
+
 # Load sudokus
 # numpy array [y_val][x_val]
 # [row][row][row]
@@ -10,19 +11,35 @@ import time
 # [column]
 def sudoku_solver(sudoku):
     class sudoku_board():
-        def __init__(self, board, changed):
+        def __init__(self, board, changed, possible_vals,last_empty_squares):
             self.board = board
             self.solved = False  # todo not using this
             self.y_size = 9
             self.x_size = 9
             self.square_changed = changed  # square that was changed to create this board
+            self.dictionary_of_possible_values = possible_vals
+            self.overall_empty_squares = []
 
         def get_board(self):
             return self.board
 
-        def check_solved(self): #for it to be correct is has to be full, and valid
-            if self.find_empty() == False: #i.e there are no empty spaces
-                if self.is_valid_overall() == True: #full thing is valid
+        def create_possible_values(
+                self):  # first time we run we are just finding all zeros and working out there possible values
+            possible_empty_squares = []
+            for y in range(0, self.x_size):  # this finds all empty squares
+                for x in range(0, self.y_size):
+                    if self.board[y][x] == 0:
+                        possible_empty_squares.append([y, x])
+            self.overall_empty_squares = possible_empty_squares
+            for this_empty_location in possible_empty_squares:
+                string_location = str(this_empty_location[0]) + str(
+                    this_empty_location[1])  # turning location into str key for dict, turn into function
+                array_of_possible_values = self.work_out_possible_values(this_empty_location)
+                self.dictionary_of_possible_values[string_location] = array_of_possible_values
+
+        def check_solved(self):  # for it to be correct is has to be full, and valid
+            if not self.find_empty():  # i.e there are no empty spaces
+                if self.is_valid_overall():  # full thing is valid
                     return True
             else:
                 return False
@@ -34,10 +51,6 @@ def sudoku_solver(sudoku):
             row_vals = []
             col_vals = []
             square_vals = []
-            #debug only
-            #if self.square_changed[0] == 7:
-             #   pass
-
 
             for x_val in range(0, self.x_size):  # checking whether the row is valid
                 this_val = self.board[self.square_changed[0], x_val]
@@ -113,7 +126,7 @@ def sudoku_solver(sudoku):
                             square_vals.append(this_val)
             return True
 
-        def workout_possible_values(self, location):  # location is an array here
+        def work_out_possible_values(self, location):  # location is an array here
             possible_values = []
             for this_value_to_check in range(1, 10):
                 if self.is_valid_partial(location, this_value_to_check):
@@ -122,22 +135,23 @@ def sudoku_solver(sudoku):
 
         def find_empty(self):  # starting top left of the sudoku board looks through to find an empty square
             possible_empty_squares = []
-            for y in range(0, self.x_size):
+            for y in range(0, self.x_size):  ##todo turn into function
                 for x in range(0, self.y_size):
                     if self.board[y][x] == 0:
-                            possible_empty_squares.append[y,x]
-            if len(possible_empty_squares) ==0: #this means we have found a full board
+                        possible_empty_squares.append([y, x])
+            if len(possible_empty_squares) == 0:  # this means we have found a full board
                 return False
-            current_lowest_value = [[10],[]]
+            current_lowest_value = [10, None]  # todo need a catch all here?
             for this_empty_location in possible_empty_squares:
-                array_of_possible_values = self.work_out_possible_values(this_empty_location)
-                if len(array_of_possible_values) ==1: #this is a singelton
+                string_location = str(this_empty_location[0]) + str(this_empty_location[1])
+                array_of_possible_values = self.dictionary_of_possible_values[string_location]
+                if len(array_of_possible_values) == 1:  # this is a singelton
                     return this_empty_location
-                elif len(array_of_possible_values) < current_lowest_value[0]:#elif here for clarity will only run if other is false anyway
+                elif len(array_of_possible_values) < current_lowest_value[
+                    0]:  # elif here for clarity will only run if other is false anyway
                     current_lowest_value[0] = len(array_of_possible_values)
                     current_lowest_value[1] = this_empty_location
             return current_lowest_value[1]
-
 
         def is_valid_partial(self, location_check, value):  # partial values for a new state
             row_vals = []
@@ -190,52 +204,43 @@ def sudoku_solver(sudoku):
                 self.print_board()
                 return False
             new_board = np.copy(self.board)
-            new_board[locations] = value
-            return sudoku_board(new_board, locations)
+            new_board[locations[0]][locations[1]] = value
+            return sudoku_board(new_board, locations, self.dictionary_of_possible_values)
 
         def set_invalid(self):
-            self.board = np.full((9,9),-1)
-
+            self.board = np.full((9, 9), -1)
 
     def go_for_this_square(next_state):
         ##for debugging
-        #print("current state of board:")
-        #next_state.print_board()
+        # print("current state of board:")
+        # next_state.print_board()
         if next_state.check_solved() == True:
             return next_state
         this_loops_start_state = next_state
         for new_value_to_try in range(1, 10):  # goes through all values from 1 - 9 inclusive
             trial_state = this_loops_start_state.create_new(new_value_to_try)
-            # trial_state.print_board()
             if trial_state.check_solved():
                 return trial_state
             if trial_state.is_valid_specific():
                 lower_state = go_for_this_square(trial_state)
                 if lower_state is not False and lower_state.check_solved():
                     return lower_state
-        trial_state.set_invalid() #todo check dont think this is correct
+        trial_state.set_invalid()  # todo check dont think this is correct
         return trial_state
-
-
-    ## load sudokus
-    sudoku = np.load("data/medium_puzzle.npy")
-    solution = np.load("data/medium_solution.npy")
-    print("easy_puzzle.npy has been loaded into the variable sudoku")
-    print(f"sudoku.shape: {sudoku.shape}, sudoku[0].shape: {sudoku[0].shape}, sudoku.dtype: {sudoku.dtype}")
 
     ## main
     ##debug only
 
-
-
     ## actual main
-    this_board_to_solve = sudoku_board(sudoku, [0,0])
+    this_board_to_solve = sudoku_board(sudoku, [0, 0], {})
+    this_board_to_solve.create_possible_values()
     if not this_board_to_solve.is_valid_overall():
         this_board_to_solve.set_invalid()
-        #returned_val = this_board_to_solve
+        returned_val = this_board_to_solve
+    else:
         returned_val = go_for_this_square(this_board_to_solve)
-    return returned_val.get_board()
 
+    return returned_val.get_board()
 
 
 ##test script
@@ -244,7 +249,7 @@ SKIP_TESTS = False
 
 def tests():
     import time
-    difficulties = ['very_easy', 'easy', 'medium', 'hard']
+    difficulties = ['very_easy', 'easy', 'medium']  # todo re-add hard
 
     for difficulty in difficulties:
         print(f"Testing {difficulty} sudokus")
