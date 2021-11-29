@@ -114,6 +114,7 @@ class sudoku_board():
         return True
 
     def find_empty(self):  # starting top left of the sudoku board looks through to find an empty square
+
         for y in range(0, self.x_size):
             for x in range(0, self.y_size):
                 if self.board[y][x] == 0:
@@ -131,17 +132,13 @@ class sudoku_board():
         return sudoku_board(new_board, locations)
 
     def set_invalid(self):
-        self.board = np.array([[-1, -1, -1, -1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-                               [-1, -1, -1, -1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-                               [-1, -1, -1, -1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-                               [-1, -1, -1, -1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-                               [-1, -1, -1, -1, -1, -1, -1, -1, -1]])
+        self.board = np.full((9,9),-1)
 
 
 def go_for_this_square(next_state):
     ##for debugging
-    print("current state of board:")
-    next_state.print_board()
+    #print("current state of board:")
+    #next_state.print_board()
     if next_state.check_solved() == True:
         return next_state
     this_loops_start_state = next_state
@@ -167,14 +164,14 @@ def boards_identical(program_board,solution_board): #check if two boards are the
     return 0,0
 
 ## load sudokus
-sudoku = np.load("data/easy_puzzle.npy")
-solution = np.load("data/easy_solution.npy")
+sudoku = np.load("data/medium_puzzle.npy")
+solution = np.load("data/medium_solution.npy")
 print("easy_puzzle.npy has been loaded into the variable sudoku")
 print(f"sudoku.shape: {sudoku.shape}, sudoku[0].shape: {sudoku[0].shape}, sudoku.dtype: {sudoku.dtype}")
 
 ## main
 ##debug only
-debug = True
+debug = False
 if debug == True:
     sudoku_to_check = 5
     initial_sudoku_list = [sudoku_board(sudoku[5], [0,0])]
@@ -219,4 +216,3 @@ else:
 
         counter += 1
         print("\n")
-
