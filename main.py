@@ -11,33 +11,33 @@ import time
 # [column]
 def sudoku_solver(sudoku):
     class sudoku_board():
-        def __init__(self, board, changed, possible_vals,last_empty_squares):
+        def __init__(self, board, changed, possible_vals, last_empty_squares):
             self.board = board
             self.solved = False  # todo not using this
             self.y_size = 9
             self.x_size = 9
             self.square_changed = changed  # square that was changed to create this board
             self.array_possible_values = possible_vals
-            self.overall_empty_squares = last_empty_squares
-
+            self.overall_empty_squares_dict = last_empty_squares
+            del self.overall_empty_squares_dict[self.location_to_string(changed)]
 
         def get_board(self):
             return self.board
+        def location_to_string(self,location):
+            return str(location[0]) + str(location[1])
         def create_possible_values(
                 self):  # first time we run we are just finding all zeros and working out there possible values
-            possible_empty_squares = []
-            for y in range(0, self.x_size):  # this finds all empty squares
-                for x in range(0, self.y_size):
-                    if self.board[y][x] == 0:
-                        possible_empty_squares.append([y, x])
-            self.overall_empty_squares = possible_empty_squares
+            possible_empty_squares = self.find_empty()
+
             for this_empty_location in possible_empty_squares:
+                self.overall_empty_squares_dict[self.location_to_string(this_empty_location)] = this_empty_location
+
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
         def check_solved(self):  # for it to be correct is has to be full, and valid
-            if not self.find_empty():  # i.e there are no empty spaces
-                if self.is_valid_overall():  # full thing is valid
+            if len(self.overall_empty_squares_dict) == 0:  # i.e there are no empty spaces
+                if self.is_valid_specific():  #todo check wether we need to use is valid overall here
                     return True
             else:
                 return False
@@ -131,18 +131,23 @@ def sudoku_solver(sudoku):
                     possible_values.append[this_value_to_check]
             return possible_values
 
-        def find_empty(self):  # starting top left of the sudoku board looks through to find an empty square
+        def find_empty(self):
             possible_empty_squares = []
             for y in range(0, self.x_size):  ##todo turn into function
                 for x in range(0, self.y_size):
                     if self.board[y][x] == 0:
                         possible_empty_squares.append([y, x])
+            return possible_empty_squares
+
+        def find_min_constraining(self):  # starting top left of the sudoku board looks through to find an empty square
+            possible_empty_squares = self.overall_empty_squares_dict.values()
             if len(possible_empty_squares) == 0:  # this means we have found a full board
                 return False
             current_lowest_value = [10, None]  # todo need a catch all here?
             for this_empty_location in possible_empty_squares:
                 array_of_possible_values = self.array_possible_values[this_empty_location[0]][this_empty_location[1]]
-                if len(array_of_possible_values) == 1 or len(array_of_possible_values) == 2:  # this is a singelton/2 options todo make expalnaiton better
+                if len(array_of_possible_values) == 1 or len(
+                        array_of_possible_values) == 2:  # this is a singelton/2 options todo make expalnaiton better
                     return this_empty_location
                 elif len(array_of_possible_values) < current_lowest_value[
                     0]:  # elif here for clarity will only run if other is false anyway
@@ -195,14 +200,14 @@ def sudoku_solver(sudoku):
             return True
 
         def create_new(self, value):  # remember x_location,y_location needs to be 0 indexed.
-            locations = self.find_empty()
+            locations = self.find_min_constraining()
             if locations == False:
                 print("something has gone wrong here, we have found a full board, looks like this:")
                 self.print_board()
                 return False
             new_board = np.copy(self.board)
             new_board[locations[0]][locations[1]] = value
-            return sudoku_board(new_board, locations, self.array_possible_values,self.overall_empty_squares)
+            return sudoku_board(new_board, locations, self.array_possible_values, dict(self.overall_empty_squares_dict))
 
         def set_invalid(self):
             self.board = np.full((9, 9), -1)
@@ -224,19 +229,21 @@ def sudoku_solver(sudoku):
                     return lower_state
         trial_state.set_invalid()  # todo check dont think this is correct
         return trial_state
+
     def create_3d_array(size):
         overall_array = []
-        for y in range(0,size[0]):
+        for y in range(0, size[0]):
             this_array = []
-            for x in range(0,size[1]):
+            for x in range(0, size[1]):
                 this_array.append([])
             overall_array.append(this_array)
         return overall_array
+
     ## main
     ##debug only
 
     ## actual main
-    this_board_to_solve = sudoku_board(sudoku, [0, 0],create_3d_array([9,9]) ,[])
+    this_board_to_solve = sudoku_board(sudoku, [0, 0], create_3d_array([9, 9]), {"00": [0,0] }) #add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
     if not this_board_to_solve.is_valid_overall():
         this_board_to_solve.set_invalid()
@@ -245,8 +252,6 @@ def sudoku_solver(sudoku):
         returned_val = go_for_this_square(this_board_to_solve)
 
     return returned_val.get_board()
-
-
 
 
 ##test script
