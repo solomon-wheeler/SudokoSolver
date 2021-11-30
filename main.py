@@ -10,27 +10,32 @@ import time
 # [column]
 # [column]
 def sudoku_solver(sudoku):
+
+    def location_to_string(location): #function which takes
+        return str(location[0]) + str(location[1])
+
+
+
+
     class sudoku_board():
         def __init__(self, board, changed, possible_vals, last_empty_squares):
             self.board = board
-            self.solved = False  # todo not using this
             self.y_size = 9
             self.x_size = 9
             self.square_changed = changed  # square that was changed to create this board
             self.array_possible_values = possible_vals
             self.overall_empty_squares_dict = last_empty_squares
-            del self.overall_empty_squares_dict[self.location_to_string(changed)]
+            del self.overall_empty_squares_dict[location_to_string(changed)]
 
         def get_board(self):
             return self.board
-        def location_to_string(self,location):
-            return str(location[0]) + str(location[1])
+
         def create_possible_values(
                 self):  # first time we run we are just finding all zeros and working out there possible values
             possible_empty_squares = self.find_empty()
 
             for this_empty_location in possible_empty_squares:
-                self.overall_empty_squares_dict[self.location_to_string(this_empty_location)] = this_empty_location
+                self.overall_empty_squares_dict[location_to_string(this_empty_location)] = this_empty_location
 
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
@@ -201,7 +206,7 @@ def sudoku_solver(sudoku):
 
         def create_new(self, value):  # remember x_location,y_location needs to be 0 indexed.
             locations = self.find_min_constraining()
-            if locations == False:
+            if locations == False: #todo sort this out to exception
                 print("something has gone wrong here, we have found a full board, looks like this:")
                 self.print_board()
                 return False
@@ -256,6 +261,7 @@ def sudoku_solver(sudoku):
 
 ##test script
 SKIP_TESTS = False
+overall_start_time = time.process_time()
 
 
 def tests():
@@ -298,3 +304,6 @@ def tests():
 
 if not SKIP_TESTS:
     tests()
+
+overall_end_time = time.process_time()
+print("Overall this took", overall_end_time - overall_start_time, "seconds to solve.\n")
