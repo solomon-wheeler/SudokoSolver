@@ -1,6 +1,6 @@
 import numpy as np
 import time
-
+import copy
 
 # numpy array [y_val][x_val]
 # [row][row][row]
@@ -22,7 +22,7 @@ def sudoku_solver(sudoku):
             self.x_size = 9
             self.square_changed = changed_location  # square that was changed to create this board
             self.value_of_changed_square = changed_value #value of the square that was changed to create this board
-            self.array_possible_values = possible_vals #this is a 3d array with empty squares filled with arrays of possible values for that squares
+            self.array_possible_values = copy.deepcopy(possible_vals) #this is a 3d array with empty squares filled with arrays of possible values for that squares
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(changed_location)] #Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
@@ -44,16 +44,16 @@ def sudoku_solver(sudoku):
 
                 #debugging only
                 #print(self.array_possible_values)
-        def take_out_possible_values(self,array_to_change):
-            self.print_possible_values()
-            print(self.value_of_changed_square)
-            print(self.square_changed)
+        def take_out_possible_values(self):
+            #self.print_possible_values()
+            #print(self.value_of_changed_square)
+            #print(self.square_changed)
             for x_val in range(0,self.x_size):
                 this_val = self.array_possible_values[self.square_changed[0]][x_val] #changing this from numpy.int8 to standard integer
                 if self.value_of_changed_square in this_val:
-                    print(this_val)
+                    #print(this_val)
                     this_val.remove(self.value_of_changed_square)
-                    print(this_val)
+                    #print(this_val)
                     self.array_possible_values[self.square_changed[0]][x_val] = this_val
             for y_val in range(0,self.y_size):
                 this_val = self.array_possible_values[y_val][self.square_changed[1]]
@@ -78,7 +78,7 @@ def sudoku_solver(sudoku):
                     if self.value_of_changed_square in this_val:
                         this_val.remove(self.value_of_changed_square)
                         self.array_possible_values[y_val][x_val] = this_val
-            self.print_possible_values()
+            #self.print_possible_values()
 
         def print_possible_values(self): #todo for debugging only
             for x in self.array_possible_values:
@@ -252,8 +252,6 @@ def sudoku_solver(sudoku):
             if value in self.array_possible_values[locations[0]][locations[1]]:
                 new_board = np.copy(self.board)
                 new_board[locations[0]][locations[1]] = value
-                new_possible_values = self.array_possible_values()
-                new_possible_values.
                 return sudoku_board(new_board, locations,value, self.array_possible_values, dict(self.overall_empty_squares_dict))
             else:
                 if self.is_valid_partial(locations, value):
