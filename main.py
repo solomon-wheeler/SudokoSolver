@@ -98,6 +98,8 @@ def sudoku_solver(sudoku):
             print(self.board)
 
         def is_valid_specific(self):# check if a sudoku board is valid from last change
+
+
             row_vals = set([])
             col_vals = set([])
 
@@ -253,10 +255,11 @@ def sudoku_solver(sudoku):
                 new_board = np.copy(self.board)
                 new_board[locations[0]][locations[1]] = value
                 return sudoku_board(new_board, locations,value, self.array_possible_values, dict(self.overall_empty_squares_dict))
-            else:
-                if self.is_valid_partial(locations, value):
-                    print("fuckkkkkk")
-                return "skip"
+            #debug only
+            #else:
+             #   if self.is_valid_partial(locations, value):
+              #      print("fuckkkkkk")
+            return "skip"
 
         def set_invalid(self): #sets our board to invalid state, stipulated as filled with -1
             self.board = np.full((9, 9), -1)
@@ -289,6 +292,15 @@ def sudoku_solver(sudoku):
                 this_array.append([])
             overall_array.append(this_array)
         return overall_array
+    def deep_copy_2d_array(array_to_copy):
+        overall_array = []
+        for columns in array_to_copy:
+            this_array = []
+            for rows in columns:
+                this_array.append(rows)
+            overall_array.append(this_array)
+        return(overall_array)
+
 
     ## main
     ##debug only
