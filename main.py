@@ -10,12 +10,8 @@ import time
 # [column]
 # [column]
 def sudoku_solver(sudoku):
-
-    def location_to_string(location): #function which takes
+    def location_to_string(location):
         return str(location[0]) + str(location[1])
-
-
-
 
     class sudoku_board():
         def __init__(self, board, changed, possible_vals, last_empty_squares):
@@ -261,7 +257,6 @@ def sudoku_solver(sudoku):
 
 ##test script
 SKIP_TESTS = False
-overall_start_time = time.process_time()
 
 
 def tests():
@@ -304,6 +299,3 @@ def tests():
 
 if not SKIP_TESTS:
     tests()
-
-overall_end_time = time.process_time()
-print("Overall this took", overall_end_time - overall_start_time, "seconds to solve.\n")
