@@ -25,6 +25,7 @@ def sudoku_solver(sudoku):
             self.array_possible_values = possible_vals #this is a 3d array with empty squares filled with arrays of possible values for that squares
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(changed_location)] #Deleting the value we have just filled from our empty squares list, since it is no longer empty
+            self.take_out_possible_values()
         def get_board(self):
             return self.board
 
@@ -37,17 +38,25 @@ def sudoku_solver(sudoku):
 
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
+            #for debugging
+            for x in self.array_possible_values:
+                print(x)
 
                 #debugging only
                 #print(self.array_possible_values)
-        def take_out_possible_values(self):
+        def take_out_possible_values(self,array_to_change):
+            self.print_possible_values()
+            print(self.value_of_changed_square)
+            print(self.square_changed)
             for x_val in range(0,self.x_size):
-                this_val = self.array_possible_values[self.square_changed[0]][ x_val] #changing this from numpy.int8 to standard integer
+                this_val = self.array_possible_values[self.square_changed[0]][x_val] #changing this from numpy.int8 to standard integer
                 if self.value_of_changed_square in this_val:
+                    print(this_val)
                     this_val.remove(self.value_of_changed_square)
+                    print(this_val)
                     self.array_possible_values[self.square_changed[0]][x_val] = this_val
-            for y_val in range(0,self.x_size):
-                this_val = self.array_possible_values[self.square_changed[0]][ x_val]
+            for y_val in range(0,self.y_size):
+                this_val = self.array_possible_values[y_val][self.square_changed[1]]
                 if self.value_of_changed_square in this_val:
                     this_val.remove(self.value_of_changed_square)
                     self.array_possible_values[y_val][self.square_changed[1]] = this_val
@@ -65,11 +74,15 @@ def sudoku_solver(sudoku):
                 x_bias = 6
             for y_val in range(0 + y_bias, 3 + y_bias): #we are looping through each of the values in the square
                 for x_val in range(0 + x_bias, 3 + x_bias):
-                    this_val = self.array_possible_values[y_val][ x_val]
+                    this_val = self.array_possible_values[y_val][x_val]
                     if self.value_of_changed_square in this_val:
                         this_val.remove(self.value_of_changed_square)
                         self.array_possible_values[y_val][x_val] = this_val
+            self.print_possible_values()
 
+        def print_possible_values(self): #todo for debugging only
+            for x in self.array_possible_values:
+                print(x)
 
         def workout_square_bias(self,location_to_check):  #todo use this function
             pass
@@ -115,7 +128,7 @@ def sudoku_solver(sudoku):
                 x_bias = 6
             if self.check_square(y_bias, x_bias) == False:
                 return False
-            self.take_out_possible_values()
+            #self.take_out_possible_values()
             return True
 
         def check_square(self,y_bias,x_bias): #takes the bias, either 0,3,6 to indicate what square we are checking and returns wether it is valid or not
@@ -236,9 +249,16 @@ def sudoku_solver(sudoku):
                 print("something has gone wrong here, we have found a full board, looks like this:")
                 self.print_board()
                 return False
-            new_board = np.copy(self.board)
-            new_board[locations[0]][locations[1]] = value
-            return sudoku_board(new_board, locations,value, self.array_possible_values, dict(self.overall_empty_squares_dict))
+            if value in self.array_possible_values[locations[0]][locations[1]]:
+                new_board = np.copy(self.board)
+                new_board[locations[0]][locations[1]] = value
+                new_possible_values = self.array_possible_values()
+                new_possible_values.
+                return sudoku_board(new_board, locations,value, self.array_possible_values, dict(self.overall_empty_squares_dict))
+            else:
+                if self.is_valid_partial(locations, value):
+                    print("fuckkkkkk")
+                return "skip"
 
         def set_invalid(self): #sets our board to invalid state, stipulated as filled with -1
             self.board = np.full((9, 9), -1)
@@ -251,15 +271,17 @@ def sudoku_solver(sudoku):
             return next_state
         this_loops_start_state = next_state
         for new_value_to_try in range(1, 10):  # goes through all values from 1 - 9 inclusive
+
             trial_state = this_loops_start_state.create_new(new_value_to_try)
-            if trial_state.check_solved():
-                return trial_state
-            if trial_state.is_valid_specific():
-                lower_state = go_for_this_square(trial_state)
-                if lower_state is not False and lower_state.check_solved():
-                    return lower_state
-        trial_state.set_invalid()
-        return trial_state
+            if not trial_state == "skip":
+                if trial_state.check_solved():
+                    return trial_state
+                if trial_state.is_valid_specific():
+                    lower_state = go_for_this_square(trial_state)
+                    if lower_state is not False and lower_state.check_solved():
+                        return lower_state
+        this_loops_start_state.set_invalid()
+        return this_loops_start_state
 
     def create_3d_array(size):
         overall_array = []
@@ -289,10 +311,10 @@ def sudoku_solver(sudoku):
 SKIP_TESTS = False
 overall_start_time = time.process_time()
 
-
 def tests():
     import time
     difficulties = ['very_easy', 'easy', 'medium','hard']  # todo re-add hard
+    #difficulties = ['hard']  # todo re-add hard
 
     for difficulty in difficulties:
         print(f"Testing {difficulty} sudokus")
