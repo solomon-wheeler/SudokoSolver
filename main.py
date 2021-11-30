@@ -25,7 +25,6 @@ def sudoku_solver(sudoku):
             self.array_possible_values = possible_vals #this is a 3d array with empty squares filled with arrays of possible values for that squares
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(changed_location)] #Deleting the value we have just filled from our empty squares list, since it is no longer empty
-            self.take_out_possible_values()
         def get_board(self):
             return self.board
 
@@ -38,6 +37,9 @@ def sudoku_solver(sudoku):
 
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
+
+                #debugging only
+                #print(self.array_possible_values)
         def take_out_possible_values(self):
             for x_val in range(0,self.x_size):
                 this_val = self.array_possible_values[self.square_changed[0]][ x_val] #changing this from numpy.int8 to standard integer
@@ -82,7 +84,7 @@ def sudoku_solver(sudoku):
         def print_board(self):
             print(self.board)
 
-        def is_valid_specific(self):  # check if a sudoku board is valid from last change
+        def is_valid_specific(self):# check if a sudoku board is valid from last change
             row_vals = set([])
             col_vals = set([])
 
@@ -111,9 +113,9 @@ def sudoku_solver(sudoku):
                 x_bias = 3
             else:
                 x_bias = 6
-            if self.check_square(y_bias,x_bias) == False:
+            if self.check_square(y_bias, x_bias) == False:
                 return False
-
+            self.take_out_possible_values()
             return True
 
         def check_square(self,y_bias,x_bias): #takes the bias, either 0,3,6 to indicate what square we are checking and returns wether it is valid or not
@@ -158,7 +160,7 @@ def sudoku_solver(sudoku):
             possible_values = []
             for this_value_to_check in range(1, 10):
                 if self.is_valid_partial(location, this_value_to_check):
-                    possible_values.append[this_value_to_check]
+                    possible_values.append(this_value_to_check)
             return possible_values
 
         def find_empty(self): #finds all empty squares in the sudoko board
@@ -189,7 +191,7 @@ def sudoku_solver(sudoku):
             col_vals = []
             square_vals = []
             board = np.copy(self.board)
-            board[location_check] = value
+            board[location_check[0],location_check[1]] = value
             if location_check[0] == 7:
                 pass
 
@@ -219,8 +221,13 @@ def sudoku_solver(sudoku):
             else:
                 x_bias = 6
 
-            if self.check_square(y_bias, x_bias) == False:
-                return False
+            for y_val in range(0 + y_bias, 3 + y_bias):
+                for x_val in range(0 + x_bias, 3 + x_bias):
+                    this_val = board[y_val, x_val]
+                    if this_val != 0:
+                        if this_val in square_vals:  # todo could be made more efficent?
+                            return False  # same values in square so this state is invalid
+                        square_vals.append(this_val)
             return True
 
         def create_new(self, value): #returns a new object based upon value we are currently checking, and which location is minimum constraining
