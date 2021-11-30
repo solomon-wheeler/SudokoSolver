@@ -297,7 +297,8 @@ def sudoku_solver(sudoku):
         for columns in array_to_copy:
             this_array = []
             for rows in columns:
-                this_array.append(rows)
+                for x in rows:
+                    this_array.append(x)
             overall_array.append(this_array)
         return(overall_array)
 
