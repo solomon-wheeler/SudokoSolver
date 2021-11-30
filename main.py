@@ -2,26 +2,28 @@ import numpy as np
 import time
 
 
-# Load sudokus
 # numpy array [y_val][x_val]
 # [row][row][row]
 # [column]
 # [column]
 # [column]
 # [column]
+
 def sudoku_solver(sudoku):
-    def location_to_string(location):
+
+    def location_to_string(location): #this function takes a 2d location coordinate and returns a string value for this
         return str(location[0]) + str(location[1])
 
+# Class that is used to store our sudoku board, we create new instances of these for every node in our search tree
     class sudoku_board():
         def __init__(self, board, changed, possible_vals, last_empty_squares):
             self.board = board
             self.y_size = 9
             self.x_size = 9
             self.square_changed = changed  # square that was changed to create this board
-            self.array_possible_values = possible_vals
+            self.array_possible_values = possible_vals #this is a 3d array with empty squares filled with arrays of possible values for that squares
             self.overall_empty_squares_dict = last_empty_squares
-            del self.overall_empty_squares_dict[location_to_string(changed)]
+            del self.overall_empty_squares_dict[location_to_string(changed)] #Deleting the value we have just filled from our empty squares list, since it is no longer empty
 
         def get_board(self):
             return self.board
@@ -36,9 +38,9 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
-        def check_solved(self):  # for it to be correct is has to be full, and valid
+        def check_solved(self):  #checks wether a board is solved, for it to be correct is has to be full, and valid
             if len(self.overall_empty_squares_dict) == 0:  # i.e there are no empty spaces
-                if self.is_valid_specific():  #todo check wether we need to use is valid overall here
+                if self.is_valid_specific():  # We no all prior states were valid, so we check if the value in the location we just filled is valid, if so the board is valid
                     return True
             else:
                 return False
@@ -54,16 +56,16 @@ def sudoku_solver(sudoku):
             for x_val in range(0, self.x_size):  # checking whether the row is valid
                 this_val = self.board[self.square_changed[0], x_val]
                 if this_val != 0:
-                    if this_val in row_vals:  # todo could be made more efficent?
+                    if this_val in row_vals:  # todo could be made more efficient?
                         return False  # same values in row so this state invalid
                     row_vals.append(this_val)
             for y_val in range(0, self.y_size):  # checking whether the column is valid
                 this_val = self.board[y_val, self.square_changed[1]]
                 if this_val != 0:
-                    if this_val in col_vals:  # todo could be made more efficent?
+                    if this_val in col_vals:  # todo could be made more efficient?
                         return False  # same values in column so this sate is invalid
                     col_vals.append(this_val)
-            # used to work out what square we are in, and check the locaitons in this square
+            # used to work out what square we are in, and check the locations in this square
             if 0 <= self.square_changed[0] <= 2:
                 y_bias = 0
             elif 3 <= self.square_changed[0] <= 5:
@@ -77,16 +79,16 @@ def sudoku_solver(sudoku):
             else:
                 x_bias = 6
 
-            for y_val in range(0 + y_bias, 3 + y_bias):
+            for y_val in range(0 + y_bias, 3 + y_bias): #we are looping through each of the values in the square
                 for x_val in range(0 + x_bias, 3 + x_bias):
                     this_val = self.board[y_val, x_val]
                     if this_val != 0:
                         if this_val in square_vals:  # todo could be made more efficent?
-                            return False  # same values in sqaure so this state is invalid
+                            return False  # same values in square so this state is invalid
                         square_vals.append(this_val)
             return True
 
-        def is_valid_overall(self):
+        def is_valid_overall(self): #checks if overall a sudoku board is valid, used at start when we don't know what last changed square is
             for y_val in range(0, self.x_size):
                 row_vals = []
                 for x_val in range(0, self.x_size):  # checking whether the row is valid
@@ -202,7 +204,7 @@ def sudoku_solver(sudoku):
 
         def create_new(self, value):  # remember x_location,y_location needs to be 0 indexed.
             locations = self.find_min_constraining()
-            if locations == False: #todo sort this out to exception
+            if locations == False:  # todo sort this out to exception
                 print("something has gone wrong here, we have found a full board, looks like this:")
                 self.print_board()
                 return False
@@ -244,7 +246,8 @@ def sudoku_solver(sudoku):
     ##debug only
 
     ## actual main
-    this_board_to_solve = sudoku_board(sudoku, [0, 0], create_3d_array([9, 9]), {"00": [0,0] }) #add a dictionary so our empty square can be removed in setup
+    this_board_to_solve = sudoku_board(sudoku, [0, 0], create_3d_array([9, 9]),
+                                       {"00": [0, 0]})  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
     if not this_board_to_solve.is_valid_overall():
         this_board_to_solve.set_invalid()
@@ -257,6 +260,7 @@ def sudoku_solver(sudoku):
 
 ##test script
 SKIP_TESTS = False
+overall_start_time = time.process_time()
 
 
 def tests():
@@ -299,3 +303,5 @@ def tests():
 
 if not SKIP_TESTS:
     tests()
+overall_end_time = time.process_time()
+print("Overall this  took", overall_end_time - overall_start_time, "seconds to solve.\n")
