@@ -98,40 +98,7 @@ def sudoku_solver(sudoku):
         def print_board(self):
             print(self.board)
 
-        def is_valid_specific(self):# check if a sudoku board is valid from last change
-
-
-            row_vals = set([])
-            col_vals = set([])
-
-            for x_val in range(0, self.x_size):  # checking whether the row is valid
-                this_val = self.board[self.square_changed[0], x_val]
-                if this_val != 0:
-                    if this_val in row_vals:  # todo could be made more efficient?
-                        return False  # same values in row so this state invalid
-                    row_vals.add(this_val)
-            for y_val in range(0, self.y_size):  # checking whether the column is valid
-                this_val = self.board[y_val, self.square_changed[1]]
-                if this_val != 0:
-                    if this_val in col_vals:  # todo could be made more efficient?
-                        return False  # same values in column so this sate is invalid
-                    col_vals.add(this_val)
-            # used to work out what square we are in, and check the locations in this square
-            if 0 <= self.square_changed[0] <= 2:
-                y_bias = 0
-            elif 3 <= self.square_changed[0] <= 5:
-                y_bias = 3
-            else:
-                y_bias = 6
-            if 0 <= self.square_changed[1] <= 2:
-                x_bias = 0
-            elif 3 <= self.square_changed[1] <= 5:
-                x_bias = 3
-            else:
-                x_bias = 6
-            if self.check_square(y_bias, x_bias) == False:
-                return False
-            #self.take_out_possible_values()
+        def is_valid_specific(self):#todo change this, currently just returning true isn't very helpful check if a sudoku board is valid from last change
             return True
 
         def check_square(self,y_bias,x_bias): #takes the bias, either 0,3,6 to indicate what square we are checking and returns wether it is valid or not
