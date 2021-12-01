@@ -14,6 +14,7 @@ def sudoku_solver(sudoku):
     def location_to_string(location): #this function takes a 2d location coordinate and returns a string value for this
         return str(location[0]) + str(location[1])
 
+
 # Class that is used to store our sudoku board, we create new instances of these for every node in our search tree
     class sudoku_board():
         def __init__(self, board, changed_location,changed_value, possible_vals, last_empty_squares):
@@ -40,8 +41,8 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
             #for debugging
-            for x in self.array_possible_values:
-                print(x)
+            #for x in self.array_possible_values:
+             #   print(x)
 
                 #debugging only
                 #print(self.array_possible_values)
@@ -161,12 +162,14 @@ def sudoku_solver(sudoku):
             current_lowest_value = [10, None]  #sets our lowest value to 10, this is higher than the possible amount for one square so will always be replaced by the actual location
             for this_empty_location in possible_empty_squares:
                 array_of_possible_values = self.array_possible_values[this_empty_location[0]][this_empty_location[1]]
-                if len(array_of_possible_values) == 1:  # this is a singelton so we immediatly investiage this state todo just fill in this value instead of investiaging
+                length = len(array_of_possible_values) #avoids us running this twice
+                if length == 1:  # this is a singelton so we immediatly investiage this state todo just fill in this value instead of investiaging
                     return this_empty_location
-                elif len(array_of_possible_values) < current_lowest_value[
+                elif length < current_lowest_value[
                     0]:  # elif here for clarity will only run if other is false anyway
-                    current_lowest_value[0] = len(array_of_possible_values)
+                    current_lowest_value[0] = length
                     current_lowest_value[1] = this_empty_location
+
             return current_lowest_value[1]
 
         def is_valid_partial(self, location_check, value):  # checks whether partial values for a new state are valid
