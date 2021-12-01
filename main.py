@@ -173,9 +173,9 @@ def sudoku_solver(sudoku):
             return current_lowest_value[1]
 
         def is_valid_partial(self, location_check, value):  # checks whether partial values for a new state are valid
-            row_vals = []
-            col_vals = []
-            square_vals = []
+            row_vals = set([])
+            col_vals = set([])
+            square_vals = set([])
             board = np.copy(self.board)
             board[location_check[0],location_check[1]] = value
             if location_check[0] == 7:
@@ -186,13 +186,13 @@ def sudoku_solver(sudoku):
                 if this_val != 0:
                     if this_val in row_vals:  # todo could be made more efficent?
                         return False  # same values in row so this state invalid
-                    row_vals.append(this_val)
+                    row_vals.add(this_val)
             for y_val in range(0, self.y_size):  # checking whether the column is valid
                 this_val = board[y_val, location_check[1]]
                 if this_val != 0:
                     if this_val in col_vals:  # todo could be made more efficent?
                         return False  # same values in column so this sate is invalid
-                    col_vals.append(this_val)
+                    col_vals.add(this_val)
             # used to work out what square we are in, and check the locaitons in this square
             if 0 <= location_check[0] <= 2:
                 y_bias = 0
@@ -213,7 +213,7 @@ def sudoku_solver(sudoku):
                     if this_val != 0:
                         if this_val in square_vals:  # todo could be made more efficent?
                             return False  # same values in square so this state is invalid
-                        square_vals.append(this_val)
+                        square_vals.add(this_val)
             return True
 
         def create_new(self, value): #returns a new object based upon value we are currently checking, and which location is minimum constraining
