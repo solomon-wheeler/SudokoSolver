@@ -26,6 +26,7 @@ def sudoku_solver(sudoku):
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(changed_location)] #Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
+
         def get_board(self):
             return self.board
 
