@@ -1,6 +1,5 @@
 import numpy as np
 import time
-import copy
 
 # numpy array [y_val][x_val]
 # [row][row][row]
@@ -62,18 +61,7 @@ def sudoku_solver(sudoku):
                 if self.value_of_changed_square in this_val:
                     this_val.remove(self.value_of_changed_square)
                     self.array_possible_values[y_val][self.square_changed[1]] = this_val
-            if 0 <= self.square_changed[0] <= 2:
-                y_bias = 0
-            elif 3 <= self.square_changed[0] <= 5:
-                y_bias = 3
-            else:
-                y_bias = 6
-            if 0 <= self.square_changed[1] <= 2:
-                x_bias = 0
-            elif 3 <= self.square_changed[1] <= 5:
-                x_bias = 3
-            else:
-                x_bias = 6
+            y_bias,x_bias = self.workout_square_bias(self.square_changed)
             for y_val in range(0 + y_bias, 3 + y_bias): #we are looping through each of the values in the square
                 for x_val in range(0 + x_bias, 3 + x_bias):
                     this_val = self.array_possible_values[y_val][x_val]
@@ -86,13 +74,25 @@ def sudoku_solver(sudoku):
             for x in self.array_possible_values:
                 print(x)
 
-        def workout_square_bias(self,location_to_check):  #todo use this function
-            pass
+        def workout_square_bias(self,location_to_check):
+            if 0 <= location_to_check[0] <= 2:
+                y_bias = 0
+            elif 3 <= location_to_check[0] <= 5:
+                y_bias = 3
+            else:
+                y_bias = 6
+            if 0 <= location_to_check[1] <= 2:
+                x_bias = 0
+            elif 3 <= location_to_check[1] <= 5:
+                x_bias = 3
+            else:
+                x_bias = 6
+            return y_bias,x_bias
 
         def check_solved(self):  #checks whether a board is solved, for it to be correct is has to be full, and valid
             if len(self.overall_empty_squares_dict) == 0:  # i.e there are no empty spaces
-                if self.is_valid_specific():  # We no all prior states were valid, so we check if the value in the location we just filled is valid, if so the board is valid
-                    return True
+                # we don't need to check if it is valid becuase the state won't have been created if it isn't
+                return True
             else:
                 return False
 
@@ -194,19 +194,7 @@ def sudoku_solver(sudoku):
                         return False  # same values in column so this sate is invalid
                     col_vals.add(this_val)
             # used to work out what square we are in, and check the locaitons in this square
-            if 0 <= location_check[0] <= 2:
-                y_bias = 0
-            elif 3 <= location_check[0] <= 5:
-                y_bias = 3
-            else:
-                y_bias = 6
-            if 0 <= location_check[1] <= 2:
-                x_bias = 0
-            elif 3 <= location_check[1] <= 5:
-                x_bias = 3
-            else:
-                x_bias = 6
-
+            y_bias,x_bias = self.workout_square_bias(location_check)
             for y_val in range(0 + y_bias, 3 + y_bias):
                 for x_val in range(0 + x_bias, 3 + x_bias):
                     this_val = board[y_val, x_val]
