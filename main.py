@@ -37,7 +37,7 @@ def sudoku_solver(sudoku):
             self.x_size = 9
             self.square_changed = changed_location  # square that was changed to create this board
             self.value_of_changed_square = changed_value #value of the square that was changed to create this board
-            self.array_possible_values = [list(map(list, x)) for x in possible_vals] #this is a 3d array with empty squares filled with arrays of possible values for that squares
+            self.array_possible_values = [list(map(list, x)) for x in possible_vals] #this is a 3d array with empty squares filled with arrays of possible values for that squares, map applies a function to every value in an array (or other iterable)
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(changed_location)] #Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
@@ -46,7 +46,7 @@ def sudoku_solver(sudoku):
             return self.board
 
         def create_possible_values(
-                self):  # first time we run we are just finding all zeros and working out there possible values
+                self):  # first time we run we are just finding all zeros and working out there possible values, by going through each value and checking if it is valid
             possible_empty_squares = self.find_empty()
 
             for this_empty_location in possible_empty_squares:
@@ -55,8 +55,7 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
-        def take_out_possible_values(self):
-
+        def take_out_possible_values(self): #here we are taking out the values that are no longer possible when we add a new value, e.g if we add 4 we must take out all 4's in the appropraite row/column/square
             for x_val in range(0,self.x_size):
                 this_val = self.array_possible_values[self.square_changed[0]][x_val] #changing this from numpy.int8 to standard integer
                 if self.value_of_changed_square in this_val:
@@ -77,7 +76,7 @@ def sudoku_solver(sudoku):
 
         def check_solved(self):  #checks whether a board is solved, for it to be correct is has to be full, and valid
             if len(self.overall_empty_squares_dict) == 0:  # i.e there are no empty spaces
-                # we don't need to check if it is valid becuase the state won't have been created if it isn't
+                # we don't need to check if it is valid becuase the state won't have been created if it wasn't
                 return True
             else:
                 return False
@@ -205,17 +204,16 @@ def sudoku_solver(sudoku):
             return next_state
         this_loops_start_state = next_state#we overwrite next state in our loop, so we need to keep a copy of the original.
         location_to_test = this_loops_start_state.find_min_constraining()
-        posible_values = this_loops_start_state.pos_values(location_to_test)
-        for new_value_to_try in posible_values:  # goes through all values from 1 - 9 inclusive
+        possible_values = this_loops_start_state.pos_values(location_to_test)
+        for new_value_to_try in possible_values:  # goes through all values from 1 - 9 inclusive
 
             trial_state = this_loops_start_state.create_new(new_value_to_try,location_to_test)
-            if not trial_state == "skip":
-                if trial_state.check_solved():
-                    return trial_state
-                else:
-                    lower_state = go_for_this_square(trial_state)
-                    if lower_state is not False and lower_state.check_solved():
-                        return lower_state
+            if trial_state.check_solved():
+                return trial_state
+            else:
+                lower_state = go_for_this_square(trial_state)
+                if lower_state is not False and lower_state.check_solved():
+                    return lower_state
         this_loops_start_state.set_invalid()
         return this_loops_start_state
 
