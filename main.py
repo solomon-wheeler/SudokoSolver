@@ -54,7 +54,7 @@ def sudoku_solver(sudoku):
 
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
-            #self.array_of_possible_values = numpy.array
+
         def take_out_possible_values(self): #here we are taking out the values that are no longer possible when we add a new value, e.g if we add 4 we must take out all 4's in the appropraite row/column/square
             for x_val in range(0,self.x_size):
                 this_val = self.array_possible_values[self.square_changed[0]][x_val] #changing this from numpy.int8 to standard integer
