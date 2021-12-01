@@ -151,6 +151,8 @@ def sudoku_solver(sudoku):
                     current_lowest_value[1] = this_empty_location
 
             return current_lowest_value[1]
+        def pos_values(self,location):
+            return self.array_possible_values[location[0]][location[1]]
 
         def is_valid_partial(self, location_check, value):  # checks whether partial values for a new state are valid
             row_vals = set([])
@@ -184,16 +186,15 @@ def sudoku_solver(sudoku):
                         square_vals.add(this_val)
             return True
 
-        def create_new(self, value): #returns a new object based upon value we are currently checking, and which location is minimum constraining
-            locations = self.find_min_constraining()
+        def create_new(self, value,location_to_test): #returns a new object based upon value we are currently checking, and which location is minimum constraining
+            locations = location_to_test
             if locations == False:  # todo sort this out to exception
                 print("something has gone wrong here, we have found a full board, looks like this:")
                 return False
-            if value in self.array_possible_values[locations[0]][locations[1]]:
-                new_board = np.copy(self.board)
-                new_board[locations[0]][locations[1]] = value
-                return sudoku_board(new_board, locations,value, self.array_possible_values, dict(self.overall_empty_squares_dict))
-            return "skip"
+
+            new_board = np.copy(self.board)
+            new_board[locations[0]][locations[1]] = value
+            return sudoku_board(new_board, locations,value, self.array_possible_values, dict(self.overall_empty_squares_dict))
 
         def set_invalid(self): #sets our board to invalid state, stipulated as filled with -1
             self.board = np.full((9, 9), -1)
@@ -202,10 +203,12 @@ def sudoku_solver(sudoku):
 
         if next_state.check_solved() == True:
             return next_state
-        this_loops_start_state = next_state #we overwrite next state in our loop, so we need to keep a copy of the original.
-        for new_value_to_try in range(1, 10):  # goes through all values from 1 - 9 inclusive
+        this_loops_start_state = next_state#we overwrite next state in our loop, so we need to keep a copy of the original.
+        location_to_test = this_loops_start_state.find_min_constraining()
+        posible_values = this_loops_start_state.pos_values(location_to_test)
+        for new_value_to_try in posible_values:  # goes through all values from 1 - 9 inclusive
 
-            trial_state = this_loops_start_state.create_new(new_value_to_try)
+            trial_state = this_loops_start_state.create_new(new_value_to_try,location_to_test)
             if not trial_state == "skip":
                 if trial_state.check_solved():
                     return trial_state
