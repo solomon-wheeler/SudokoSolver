@@ -15,6 +15,21 @@ def sudoku_solver(sudoku):
 
 
 # Class that is used to store our sudoku board, we create new instances of these for every node in our search tree
+    def workout_square_bias(location_to_check):
+        if 0 <= location_to_check[0] <= 2:
+            y_bias = 0
+        elif 3 <= location_to_check[0] <= 5:
+            y_bias = 3
+        else:
+            y_bias = 6
+        if 0 <= location_to_check[1] <= 2:
+            x_bias = 0
+        elif 3 <= location_to_check[1] <= 5:
+            x_bias = 3
+        else:
+            x_bias = 6
+        return y_bias,x_bias
+
     class sudoku_board():
         def __init__(self, board, changed_location,changed_value, possible_vals, last_empty_squares):
             self.board = board
@@ -39,55 +54,26 @@ def sudoku_solver(sudoku):
 
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
-            #for debugging
-            #for x in self.array_possible_values:
-             #   print(x)
 
-                #debugging only
-                #print(self.array_possible_values)
         def take_out_possible_values(self):
-            #self.print_possible_values()
-            #print(self.value_of_changed_square)
-            #print(self.square_changed)
+
             for x_val in range(0,self.x_size):
                 this_val = self.array_possible_values[self.square_changed[0]][x_val] #changing this from numpy.int8 to standard integer
                 if self.value_of_changed_square in this_val:
-                    #print(this_val)
                     this_val.remove(self.value_of_changed_square)
-                    #print(this_val)
                     self.array_possible_values[self.square_changed[0]][x_val] = this_val
             for y_val in range(0,self.y_size):
                 this_val = self.array_possible_values[y_val][self.square_changed[1]]
                 if self.value_of_changed_square in this_val:
                     this_val.remove(self.value_of_changed_square)
                     self.array_possible_values[y_val][self.square_changed[1]] = this_val
-            y_bias,x_bias = self.workout_square_bias(self.square_changed)
+            y_bias,x_bias = workout_square_bias(self.square_changed)
             for y_val in range(0 + y_bias, 3 + y_bias): #we are looping through each of the values in the square
                 for x_val in range(0 + x_bias, 3 + x_bias):
                     this_val = self.array_possible_values[y_val][x_val]
                     if self.value_of_changed_square in this_val:
                         this_val.remove(self.value_of_changed_square)
                         self.array_possible_values[y_val][x_val] = this_val
-            #self.print_possible_values()
-
-        def print_possible_values(self): #todo for debugging only
-            for x in self.array_possible_values:
-                print(x)
-
-        def workout_square_bias(self,location_to_check):
-            if 0 <= location_to_check[0] <= 2:
-                y_bias = 0
-            elif 3 <= location_to_check[0] <= 5:
-                y_bias = 3
-            else:
-                y_bias = 6
-            if 0 <= location_to_check[1] <= 2:
-                x_bias = 0
-            elif 3 <= location_to_check[1] <= 5:
-                x_bias = 3
-            else:
-                x_bias = 6
-            return y_bias,x_bias
 
         def check_solved(self):  #checks whether a board is solved, for it to be correct is has to be full, and valid
             if len(self.overall_empty_squares_dict) == 0:  # i.e there are no empty spaces
@@ -95,12 +81,6 @@ def sudoku_solver(sudoku):
                 return True
             else:
                 return False
-
-        def print_board(self):
-            print(self.board)
-
-        def is_valid_specific(self):#todo change this, currently just returning true isn't very helpful check if a sudoku board is valid from last change
-            return True
 
         def check_square(self,y_bias,x_bias): #takes the bias, either 0,3,6 to indicate what square we are checking and returns wether it is valid or not
             square_vals = set([])
@@ -194,7 +174,7 @@ def sudoku_solver(sudoku):
                         return False  # same values in column so this sate is invalid
                     col_vals.add(this_val)
             # used to work out what square we are in, and check the locaitons in this square
-            y_bias,x_bias = self.workout_square_bias(location_check)
+            y_bias,x_bias = workout_square_bias(location_check)
             for y_val in range(0 + y_bias, 3 + y_bias):
                 for x_val in range(0 + x_bias, 3 + x_bias):
                     this_val = board[y_val, x_val]
@@ -208,35 +188,28 @@ def sudoku_solver(sudoku):
             locations = self.find_min_constraining()
             if locations == False:  # todo sort this out to exception
                 print("something has gone wrong here, we have found a full board, looks like this:")
-                self.print_board()
                 return False
             if value in self.array_possible_values[locations[0]][locations[1]]:
                 new_board = np.copy(self.board)
                 new_board[locations[0]][locations[1]] = value
                 return sudoku_board(new_board, locations,value, self.array_possible_values, dict(self.overall_empty_squares_dict))
-            #debug only
-            #else:
-             #   if self.is_valid_partial(locations, value):
-              #      print("fuckkkkkk")
             return "skip"
 
         def set_invalid(self): #sets our board to invalid state, stipulated as filled with -1
             self.board = np.full((9, 9), -1)
 
     def go_for_this_square(next_state): #our recursive function that checks all values, if they are valid it calls itself and continues down the tree. If not it prunes this branch and backtracks
-        ##for debugging
-        # print("current state of board:")
-        # next_state.print_board()
+
         if next_state.check_solved() == True:
             return next_state
-        this_loops_start_state = next_state
+        this_loops_start_state = next_state #we overwrite next state in our loop, so we need to keep a copy of the original.
         for new_value_to_try in range(1, 10):  # goes through all values from 1 - 9 inclusive
 
             trial_state = this_loops_start_state.create_new(new_value_to_try)
             if not trial_state == "skip":
                 if trial_state.check_solved():
                     return trial_state
-                if trial_state.is_valid_specific():
+                else:
                     lower_state = go_for_this_square(trial_state)
                     if lower_state is not False and lower_state.check_solved():
                         return lower_state
@@ -251,15 +224,7 @@ def sudoku_solver(sudoku):
                 this_array.append([])
             overall_array.append(this_array)
         return overall_array
-    def deep_copy_2d_array(array_to_copy):
-        overall_array = []
-        for columns in array_to_copy:
-            this_array = []
-            for rows in columns:
-                for x in rows:
-                    this_array.append(x)
-            overall_array.append(this_array)
-        return(overall_array)
+
 
 
     ## main
@@ -268,7 +233,7 @@ def sudoku_solver(sudoku):
     ## actual main
     this_board_to_solve = sudoku_board(sudoku, [0, 0],0, create_3d_array([9, 9]),{"00": [0, 0]},)  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
-    if not this_board_to_solve.is_valid_overall():
+    if not this_board_to_solve.is_valid_overall(): #we check wether the board is valid at the start, to avoid going through recursively when it is invalid
         this_board_to_solve.set_invalid()
         returned_val = this_board_to_solve
     else:
