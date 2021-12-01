@@ -22,7 +22,7 @@ def sudoku_solver(sudoku):
             self.x_size = 9
             self.square_changed = changed_location  # square that was changed to create this board
             self.value_of_changed_square = changed_value #value of the square that was changed to create this board
-            self.array_possible_values = copy.deepcopy(possible_vals) #this is a 3d array with empty squares filled with arrays of possible values for that squares
+            self.array_possible_values = [list(map(list, x)) for x in possible_vals] #this is a 3d array with empty squares filled with arrays of possible values for that squares
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(changed_location)] #Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
