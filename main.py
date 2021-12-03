@@ -53,8 +53,7 @@ def sudoku_solver(sudoku):
             self.board = board
             self.square_changed = changed_location
             self.value_of_changed_square = changed_value
-            self.array_possible_values = [list(map(list, x)) for x in
-                                          possible_vals]  # creating a deep copy of our 3d array
+            self.array_possible_values = [[j[:] for j in x ]for x in possible_vals]  # creating a deep copy of our 3d array
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(
                 changed_location)]  # Deleting the value we have just filled from our empty squares list, since it is no longer empty
@@ -79,8 +78,7 @@ def sudoku_solver(sudoku):
         def take_out_possible_values(
                 self):
             for x_val in range(0, 9):
-                this_val = self.array_possible_values[self.square_changed[0]][
-                    x_val]  # changing this from numpy.int8 to standard integer
+                this_val = self.array_possible_values[self.square_changed[0]][x_val]
                 if self.value_of_changed_square in this_val:
                     this_val.remove(self.value_of_changed_square)
                     self.array_possible_values[self.square_changed[0]][x_val] = this_val
@@ -181,21 +179,22 @@ def sudoku_solver(sudoku):
             possible_empty_squares = self.overall_empty_squares_dict.values()
             if len(possible_empty_squares) == 0:  # this means we have found a full board
                 return False
-            current_lowest_value = [10,
-                                    None]  # sets our lowest value to 10, this is higher than the possible amount for one square so will always be replaced by the actual location
+            current_lowest_value = [10,None]  # sets our lowest value to 10, this is higher than the possible amount for one square so will always be replaced by the actual location
             for this_empty_location in possible_empty_squares:
                 array_of_possible_values = self.array_possible_values[this_empty_location[0]][this_empty_location[1]]
                 length = len(array_of_possible_values)  # avoids us running this twice
                 if length == 1:  # this is a singelton so we immediatly investiage this state todo just fill in this value instead of investiaging
                     return this_empty_location
-                elif length < current_lowest_value[
-                    0]:  # elif here for clarity will only run if other is false anyway
+                elif length < current_lowest_value[0]:  # elif here for clarity will only run if other is false anyway
                     current_lowest_value[0] = length
                     current_lowest_value[1] = this_empty_location
-
+                elif length == current_lowest_value[0]:
+                    if this_empty_location[0] == self.square_changed[0] or this_empty_location[1] == self.square_changed[1]:
+                        current_lowest_value[0] = length
+                        current_lowest_value[1] = this_empty_location
             return current_lowest_value[1]
         #
-        # returns the possible values for a location
+        # Returns the values that are currently valid for a location
         # Arguments, location (array)
         #
         def pos_values(self, location):
@@ -220,9 +219,9 @@ def sudoku_solver(sudoku):
                 this_val = board[y_val, location_check[1]]
                 if this_val != 0:
                     if this_val in col_vals:  # todo could be made more efficent?
-                        return False  # same values in column so this sate is invalid
+                        return False  # same values in column so this state is invalid
                     col_vals.add(this_val)
-            # used to work out what square we are in, and check the locaitons in this square
+            # used to work out what square we are in, and check the locations in this square
             y_bias, x_bias = workout_square_bias(location_check)
             for y_val in range(0 + y_bias, 3 + y_bias):
                 for x_val in range(0 + x_bias, 3 + x_bias):
@@ -233,27 +232,36 @@ def sudoku_solver(sudoku):
                         square_vals.add(this_val)
             return True
 
+        #
+        # Returns a new object based upon value we are currently checking, and which location is minimum constraining.
+        # Arguments:
+        # location_to_test, the location we are going to change
+        # value, the number we are going to place in this location (Integer)
+        #
         def create_new(self, value,
-                       location_to_test):  # returns a new object based upon value we are currently checking, and which location is minimum constraining
+                       location_to_test):
             locations = location_to_test
             new_board = np.copy(self.board)
             new_board[locations[0]][locations[1]] = value
             return sudoku_board(new_board, locations, value, self.array_possible_values,
                                 dict(self.overall_empty_squares_dict))
-
-        def set_invalid(self):  # sets our board to invalid state, stipulated as filled with -1
+        #
+        # sets our board to invalid state, stipulated as filled with -1
+        #
+        def set_invalid(self):
             self.board = np.full((9, 9), -1)
-
+    #
+    # Recursive function that checks all values, if they are valid it calls itself and continues down the tree. If not it prunes this branch and backtracks
+    #
     def go_for_this_square(
-            next_state):  # our recursive function that checks all values, if they are valid it calls itself and continues down the tree. If not it prunes this branch and backtracks
+            next_state):
 
         if next_state.check_solved() == True:
             return next_state
         this_loops_start_state = next_state  # we overwrite next state in our loop, so we need to keep a copy of the original.
-        location_to_test = this_loops_start_state.find_min_constraining()
-        possible_values = this_loops_start_state.pos_values(location_to_test)
-        for new_value_to_try in possible_values:  # goes through all values from 1 - 9 inclusive
-
+        location_to_test = this_loops_start_state.find_min_constraining() #finds the min constraining value
+        possible_values = this_loops_start_state.pos_values(location_to_test) #finds the possible values for this location
+        for new_value_to_try in possible_values:  # goes through all values that are possible
             trial_state = this_loops_start_state.create_new(new_value_to_try, location_to_test)
             if trial_state.check_solved():
                 return trial_state
@@ -263,6 +271,7 @@ def sudoku_solver(sudoku):
                     return lower_state
         this_loops_start_state.set_invalid()
         return this_loops_start_state
+
 
     def create_3d_array(size):
         overall_array = []
