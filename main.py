@@ -73,8 +73,11 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
+        #
+        # Taking out the values that are no longer possible when we add a new value, e.g if we add 4 we must take out all 4's in the appropraite row/column/square
+        #
         def take_out_possible_values(
-                self):  # here we are taking out the values that are no longer possible when we add a new value, e.g if we add 4 we must take out all 4's in the appropraite row/column/square
+                self):
             for x_val in range(0, 9):
                 this_val = self.array_possible_values[self.square_changed[0]][
                     x_val]  # changing this from numpy.int8 to standard integer
@@ -148,6 +151,7 @@ def sudoku_solver(sudoku):
                 if not self.check_square(y_bias, x_bias):
                     return False
             return True
+
         #
         # takes a location and works out valid numbers for it
         # Arguments, location (array)
@@ -159,17 +163,21 @@ def sudoku_solver(sudoku):
                 if self.is_valid_partial(location, this_value_to_check):
                     possible_values.append(this_value_to_check)
             return possible_values
-
-        def find_empty(self):  # finds all empty squares in the sudoko board
+        #
+        # finds all empty squares in the sudoko board, by going through and checking for 0s
+        #
+        def find_empty(self):
             possible_empty_squares = []
             for y in range(0, 9):
                 for x in range(0, 9):
                     if self.board[y][x] == 0:
                         possible_empty_squares.append([y, x])
             return possible_empty_squares
-
+        #
+        # returns the minimum constraining value, by going through all empty squares and checking how many possible values they have
+        #
         def find_min_constraining(
-                self):  # returns the minimum constraining value, does this by goinng through all empty squares and checking how many possible values they have
+                self):
             possible_empty_squares = self.overall_empty_squares_dict.values()
             if len(possible_empty_squares) == 0:  # this means we have found a full board
                 return False
@@ -186,7 +194,10 @@ def sudoku_solver(sudoku):
                     current_lowest_value[1] = this_empty_location
 
             return current_lowest_value[1]
-
+        #
+        # returns the possible values for a location
+        # Arguments, location (array)
+        #
         def pos_values(self, location):
             return self.array_possible_values[location[0]][location[1]]
 
