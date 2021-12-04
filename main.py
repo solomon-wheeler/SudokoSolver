@@ -2,12 +2,6 @@ import numpy as np
 import time
 
 
-# numpy array [y_val][x_val]
-# [row][row][row]
-# [column]
-# [column]
-# [column]
-# [column]
 
 def sudoku_solver(sudoku):
     #
@@ -73,65 +67,6 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
-        def remove_naked(self):
-            for y_location in range(0, 9):
-                row_array = []
-                for x_location in range(0, 9):
-                    this_val = self.array_possible_values[y_location][x_location]
-                    if len(this_val) > 1:
-                        counter = 0
-                        for this_check in row_array:
-                            if this_val == this_check:
-                                pair_locations = [x_location,counter]
-                                self.remove_naked_row(y_location,pair_locations,this_val)
-                            counter += 1
-                    row_array.append(this_val)
-            for x_location in range(0, 9):
-                col_array = []
-                for y_location in range(0, 9):
-                    this_val = self.array_possible_values[y_location][x_location]
-                    if len(this_val) == 2:
-                        counter = 0
-                        for this_check in col_array:
-                            if this_val == this_check:
-                                pair_locations = [y_location,counter]
-                                self.remove_naked_col(x_location,pair_locations,this_val)
-                            counter += 1
-                    row_array.append(this_val)
-            #todo add squares here
-
-
-        def remove_naked_row(self, row_down,pair_locations, values):
-            naked_list = list(values)
-            locations_without_pair = [0,1,2,3,4,5,6,7,8]
-            print(pair_locations)
-            for this_location in pair_locations:
-                locations_without_pair.remove(this_location)
-
-            for x_val in locations_without_pair:
-                possible_values = self.array_possible_values[row_down][x_val]
-                for this_check in naked_list:
-                    if this_check in possible_values:
-                        possible_values.remove(this_check)
-                        self.array_possible_values[row_down][x_val] = possible_values
-
-        def remove_naked_col(self, col_across,pair_locations, values):
-            first_naked = values[0]
-            second_naked = values[1]
-            locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-            print(pair_locations)
-            for this_location in pair_locations:
-                locations_without_pair.remove(this_location)
-
-            for y_val in locations_without_pair:
-                possible_values = self.array_possible_values[y_val][col_across]
-                if first_naked in possible_values:
-                    possible_values.remove(first_naked)
-                    self.array_possible_values[y_val][col_across] = possible_values
-                print(values)
-                if second_naked in possible_values:
-                    possible_values.remove(second_naked)
-                    self.array_possible_values[y_val][col_across] = possible_values
         #
         # Taking out the values that are no longer possible when we add a new value, e.g if we add 4 we must take out all 4's in the appropraite row/column/square
         #
