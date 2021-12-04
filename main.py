@@ -53,7 +53,8 @@ def sudoku_solver(sudoku):
             self.board = board
             self.square_changed = changed_location
             self.value_of_changed_square = changed_value
-            self.array_possible_values = [[j[:] for j in x ]for x in possible_vals]  # creating a deep copy of our 3d array
+            self.array_possible_values = [[j[:] for j in x] for x in
+                                          possible_vals]  # creating a deep copy of our 3d array
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[location_to_string(
                 changed_location)]  # Deleting the value we have just filled from our empty squares list, since it is no longer empty
@@ -72,6 +73,69 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
+        def remove_naked(self):
+            for y_location in range(0, 9):
+                row_array = []
+                for x_location in range(0, 9):
+                    this_val = self.array_possible_values[y_location][x_location]
+                    if len(this_val) == 2:
+                        counter = 0
+                        for this_check in row_array:
+                            if this_val == this_check:
+                                pair_locations = [x_location,counter]
+                                self.remove_naked_row(y_location,pair_locations,this_val)
+                            counter += 1
+                    row_array.append(this_val)
+            for x_location in range(0, 9):
+                col_array = []
+                for y_location in range(0, 9):
+                    this_val = self.array_possible_values[y_location][x_location]
+                    if len(this_val) == 2:
+                        counter = 0
+                        for this_check in col_array:
+                            if this_val == this_check:
+                                pair_locations = [y_location,counter]
+                                self.remove_naked_col(x_location,pair_locations,this_val)
+                            counter += 1
+                    row_array.append(this_val)
+            #todo add squares here
+
+
+        def remove_naked_row(self, row_down,pair_locations, values):
+            first_naked = values[0]
+            second_naked = values[1]
+            locations_without_pair = [0,1,2,3,4,5,6,7,8]
+            print(pair_locations)
+            for this_location in pair_locations:
+                locations_without_pair.remove(this_location)
+
+            for x_val in locations_without_pair:
+                possible_values = self.array_possible_values[row_down][x_val]
+                if first_naked in possible_values:
+                    possible_values.remove(first_naked)
+                    self.array_possible_values[row_down][x_val] = possible_values
+                print(values)
+                if second_naked in possible_values:
+                    possible_values.remove(second_naked)
+                    self.array_possible_values[row_down][x_val] = possible_values
+
+        def remove_naked_col(self, col_across,pair_locations, values):
+            first_naked = values[0]
+            second_naked = values[1]
+            locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+            print(pair_locations)
+            for this_location in pair_locations:
+                locations_without_pair.remove(this_location)
+
+            for y_val in locations_without_pair:
+                possible_values = self.array_possible_values[y_val][col_across]
+                if first_naked in possible_values:
+                    possible_values.remove(first_naked)
+                    self.array_possible_values[y_val][col_across] = possible_values
+                print(values)
+                if second_naked in possible_values:
+                    possible_values.remove(second_naked)
+                    self.array_possible_values[y_val][col_across] = possible_values
         #
         # Taking out the values that are no longer possible when we add a new value, e.g if we add 4 we must take out all 4's in the appropraite row/column/square
         #
@@ -161,6 +225,7 @@ def sudoku_solver(sudoku):
                 if self.is_valid_partial(location, this_value_to_check):
                     possible_values.append(this_value_to_check)
             return possible_values
+
         #
         # finds all empty squares in the sudoko board, by going through and checking for 0s
         #
@@ -171,6 +236,7 @@ def sudoku_solver(sudoku):
                     if self.board[y][x] == 0:
                         possible_empty_squares.append([y, x])
             return possible_empty_squares
+
         #
         # returns the minimum constraining value, by going through all empty squares and checking how many possible values they have
         #
@@ -179,7 +245,8 @@ def sudoku_solver(sudoku):
             possible_empty_squares = self.overall_empty_squares_dict.values()
             if len(possible_empty_squares) == 0:  # this means we have found a full board
                 return False
-            current_lowest_value = [10,None]  # sets our lowest value to 10, this is higher than the possible amount for one square so will always be replaced by the actual location
+            current_lowest_value = [10,
+                                    None]  # sets our lowest value to 10, this is higher than the possible amount for one square so will always be replaced by the actual location
             for this_empty_location in possible_empty_squares:
                 array_of_possible_values = self.array_possible_values[this_empty_location[0]][this_empty_location[1]]
                 length = len(array_of_possible_values)  # avoids us running this twice
@@ -189,10 +256,12 @@ def sudoku_solver(sudoku):
                     current_lowest_value[0] = length
                     current_lowest_value[1] = this_empty_location
                 elif length == current_lowest_value[0]:
-                    if this_empty_location[0] == self.square_changed[0] or this_empty_location[1] == self.square_changed[1]:
+                    if this_empty_location[0] == self.square_changed[0] or this_empty_location[1] == \
+                            self.square_changed[1]:
                         current_lowest_value[0] = length
                         current_lowest_value[1] = this_empty_location
             return current_lowest_value[1]
+
         #
         # Returns the values that are currently valid for a location
         # Arguments, location (array)
@@ -245,22 +314,26 @@ def sudoku_solver(sudoku):
             new_board[locations[0]][locations[1]] = value
             return sudoku_board(new_board, locations, value, self.array_possible_values,
                                 dict(self.overall_empty_squares_dict))
+
         #
         # sets our board to invalid state, stipulated as filled with -1
         #
         def set_invalid(self):
             self.board = np.full((9, 9), -1)
+
     #
-    # Recursive function that checks all values, if they are valid it calls itself and continues down the tree. If not it prunes this branch and backtracks
+    # Recursive function that checks all values, if they are valid it calls itself and continues down the tree. If
+    # not it prunes this branch and backtracks
     #
     def go_for_this_square(
             next_state):
 
-        if next_state.check_solved() == True:
+        if next_state.check_solved():
             return next_state
         this_loops_start_state = next_state  # we overwrite next state in our loop, so we need to keep a copy of the original.
-        location_to_test = this_loops_start_state.find_min_constraining() #finds the min constraining value
-        possible_values = this_loops_start_state.pos_values(location_to_test) #finds the possible values for this location
+        location_to_test = this_loops_start_state.find_min_constraining()  # finds the min constraining value
+        possible_values = this_loops_start_state.pos_values(
+            location_to_test)  # finds the possible values for this location
         for new_value_to_try in possible_values:  # goes through all values that are possible
             trial_state = this_loops_start_state.create_new(new_value_to_try, location_to_test)
             if trial_state.check_solved():
@@ -272,7 +345,6 @@ def sudoku_solver(sudoku):
         this_loops_start_state.set_invalid()
         return this_loops_start_state
 
-
     def create_3d_array(size):
         overall_array = []
         for y in range(0, size[0]):
@@ -282,13 +354,11 @@ def sudoku_solver(sudoku):
             overall_array.append(this_array)
         return overall_array
 
-    ## main
-    ##debug only
-
-    ## actual main
+    # Main
     this_board_to_solve = sudoku_board(sudoku, [0, 0], 0, create_3d_array([9, 9]),
                                        {"00": [0, 0]}, )  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
+    this_board_to_solve.remove_naked()
     if not this_board_to_solve.is_valid_overall():  # we check wether the board is valid at the start, to avoid going through recursively when it is invalid
         this_board_to_solve.set_invalid()
         returned_val = this_board_to_solve
@@ -298,7 +368,7 @@ def sudoku_solver(sudoku):
     return returned_val.get_board()
 
 
-##test script
+# Test script
 SKIP_TESTS = False
 overall_start_time = time.process_time()
 
@@ -306,7 +376,6 @@ overall_start_time = time.process_time()
 def tests():
     import time
     difficulties = ['very_easy', 'easy', 'medium', 'hard']  # todo re-add hard
-    # difficulties = ['hard']  # todo re-add hard
 
     for difficulty in difficulties:
         print(f"Testing {difficulty} sudokus")
@@ -321,7 +390,6 @@ def tests():
             print(sudoku)
 
             start_time = time.process_time()
-            # sudoku= np.array([[8,0,0,0,0,0,0,0,0],[0,0,3,6,0,0,0,0,0],[0,7,0,0,9,0,2,0,0],[0,5,0,0,0,7,0,0,0],[0,0,0,0,4,5,7,0,0],[0,0,0,1,0,0,0,3,0],[0,0,1,0,0,0,0,6,8],[0,0,8,5,0,0,0,1,0],[0,9,0,0,0,0,4,0,0]])
             your_solution = sudoku_solver(sudoku)
             end_time = time.process_time()
 
