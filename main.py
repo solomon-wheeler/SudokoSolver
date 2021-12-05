@@ -208,7 +208,6 @@ def sudoku_solver(sudoku):
                                     self.remove_naked_col(x_location, triple_locations, this_val)
                             counter += 1
                     col_array.append(this_val)
-            #Not including square check here, see read_me
 
 
         def remove_naked_square(self, y_bias, x_bias, locations_to_skip, values):
