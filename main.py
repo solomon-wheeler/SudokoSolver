@@ -11,6 +11,20 @@ import time
 
 def sudoku_solver(sudoku):
     #
+    # Creates an empty 3d array
+    # Arguments: size ( array )
+    #
+
+    def create_3d_array(size):
+        overall_array = []
+        for y in range(0, size[0]):
+            this_array = []
+            for x in range(0, size[1]):
+                this_array.append([])
+            overall_array.append(this_array)
+        return overall_array
+
+    #
     # Takes a 2d location coordinate and returns a string value for this
     # Arguments: Location( array )
     #
@@ -20,7 +34,7 @@ def sudoku_solver(sudoku):
     #
     # Used to work out which square we are checking in, and returns the bias (i.e 0 for first square, 3 for second, 6 for third)
     # Arguments : location (array)
-    # Returns : y, x bias (tuple)
+    # Returns : y_bias, x_bias (tuple)
     #
     def workout_square_bias(location_to_check):
         if 0 <= location_to_check[0] <= 2:
@@ -60,7 +74,6 @@ def sudoku_solver(sudoku):
                 changed_location)]  # Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
             self.remove_naked_specific()
-            #self.hidden_singles_specific()
 
         def get_board(self):
             return self.board
@@ -313,7 +326,7 @@ def sudoku_solver(sudoku):
                 for y_val in range(0, 9):  # checking whether the column is valid
                     this_val = int(self.board[y_val, x_val])
                     if this_val != 0:
-                        if this_val in col_vals:  # todo could be made more efficent?
+                        if this_val in col_vals:
                             return False  # same values in column so this sate is invalid
                         col_vals.append(this_val)
             for x_bias in [0, 3, 6]:
@@ -374,7 +387,7 @@ def sudoku_solver(sudoku):
         # Returns the values that are currently valid for a location
         # Arguments, location (array)
         #
-        def pos_values(self, location):
+        def get_pos_values(self, location):
             return self.array_possible_values[location[0]][location[1]]
 
         def is_valid_partial(self, location_check, value):  # checks whether partial values for a new state are valid
@@ -445,7 +458,7 @@ def sudoku_solver(sudoku):
             return next_state
         this_loops_start_state = next_state  # we overwrite next state in our loop, so we need to keep a copy of the original.
         location_to_test = this_loops_start_state.find_min_constraining()  # finds the min constraining value
-        possible_values = this_loops_start_state.pos_values(
+        possible_values = this_loops_start_state.get_pos_values(
             location_to_test)  # finds the possible values for this location
         for new_value_to_try in possible_values:  # goes through all values that are possible
             trial_state = this_loops_start_state.create_new(new_value_to_try, location_to_test)
@@ -458,21 +471,13 @@ def sudoku_solver(sudoku):
         this_loops_start_state.set_invalid()
         return this_loops_start_state
 
-    def create_3d_array(size):
-        overall_array = []
-        for y in range(0, size[0]):
-            this_array = []
-            for x in range(0, size[1]):
-                this_array.append([])
-            overall_array.append(this_array)
-        return overall_array
+
 
     # Main
     this_board_to_solve = sudoku_board(sudoku, [0, 0], 0, create_3d_array([9, 9]),
                                        {"00": [0, 0]}, )  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
     this_board_to_solve.remove_naked_overall()
-    #this_board_to_solve.hidden_singles_overall()
 
     if not this_board_to_solve.is_valid_overall():  # we check wether the board is valid at the start, to avoid going through recursively when it is invalid
         this_board_to_solve.set_invalid()
