@@ -1,14 +1,6 @@
 import numpy as np
 import time
 
-
-# numpy array [y_val][x_val]
-# [row][row][row]
-# [column]
-# [column]
-# [column]
-# [column]
-
 def sudoku_solver(sudoku):
     #
     # Creates an empty 3d array
