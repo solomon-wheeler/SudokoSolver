@@ -1,7 +1,15 @@
+import copy
+
 import numpy as np
 import time
 
 
+# numpy array [y_val][x_val]
+# [row][row][row]
+# [column]
+# [column]
+# [column]
+# [column]
 
 def sudoku_solver(sudoku):
     #
@@ -66,6 +74,90 @@ def sudoku_solver(sudoku):
 
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
+
+        def remove_naked(self):
+            for y_location in range(0, 9):
+                row_array = []
+                for x_location in range(0, 9):
+                    this_val = self.array_possible_values[y_location][x_location]
+                    if len(this_val) == 2:
+                        counter = 0
+                        for this_check in row_array:
+                            if this_val == this_check:
+                                pair_locations = [x_location,counter]
+                                self.remove_naked_row(y_location,pair_locations,this_val)
+                            counter += 1
+                    elif len(this_val) == 3:
+                        counter = 0
+                        triple_locations = []
+                        found_two = False
+                        for this_check in row_array:
+                            if this_val == this_check:
+                                if found_two == False:
+                                    triple_locations.append(x_location)
+                                    triple_locations.append(counter)
+                                    found_two = True
+                                elif found_two == True:
+                                    triple_locations.append(counter)
+                                    self.remove_naked_row(y_location, triple_locations, this_val)
+                            counter += 1
+                    row_array.append(this_val)
+            for x_location in range(0, 9):
+                col_array = []
+                for y_location in range(0, 9):
+                    this_val = self.array_possible_values[y_location][x_location]
+                    if len(this_val) == 2:
+                        counter = 0
+                        for this_check in col_array:
+                            if this_val == this_check:
+                                pair_locations = [y_location,counter]
+                                self.remove_naked_col(x_location,pair_locations,this_val)
+                            counter += 1
+                    elif len(this_val) == 3:
+                        counter = 0
+                        triple_locations = []
+                        found_two = False
+                        for this_check in col_array:
+                            if this_val == this_check:
+                                if found_two == False:
+                                    triple_locations.append(y_location)
+                                    triple_locations.append(counter)
+                                    found_two = True
+                                elif found_two == True:
+                                    triple_locations.append(counter)
+                                    self.remove_naked_col(x_location, triple_locations, this_val)
+                            counter += 1
+                    row_array.append(this_val)
+            #todo add squares here
+
+
+        def remove_naked_row(self, row_down, naked_locations, values):
+            naked_list = copy.deepcopy(values)
+            locations_without_pair = [0,1,2,3,4,5,6,7,8]
+            print(naked_locations)
+            for this_location in naked_locations:
+                locations_without_pair.remove(this_location)
+
+            for x_val in locations_without_pair:
+                possible_values = list(self.array_possible_values[row_down][x_val])
+                for this_check in naked_list:
+                    if this_check in possible_values:
+                        possible_values.remove(this_check)
+                self.array_possible_values[row_down][x_val] = list(possible_values)
+
+        def remove_naked_col(self, col_across, pair_locations, values):
+            naked_list = copy.deepcopy(values)
+            locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+            print(pair_locations)
+            for this_location in pair_locations:
+                locations_without_pair.remove(this_location)
+
+            for y_val in locations_without_pair:
+                possible_values = list(self.array_possible_values[y_val][col_across])
+                for this_check in naked_list:
+                    if this_check in possible_values:
+                        possible_values.remove(this_check)
+                self.array_possible_values[y_val][col_across] = list(possible_values)
 
         #
         # Taking out the values that are no longer possible when we add a new value, e.g if we add 4 we must take out all 4's in the appropraite row/column/square
@@ -256,7 +348,7 @@ def sudoku_solver(sudoku):
     # Recursive function that checks all values, if they are valid it calls itself and continues down the tree. If
     # not it prunes this branch and backtracks
     #
-    def go_for_this_square(
+    def depth_first_search(
             next_state):
 
         if next_state.check_solved():
@@ -270,7 +362,7 @@ def sudoku_solver(sudoku):
             if trial_state.check_solved():
                 return trial_state
             else:
-                lower_state = go_for_this_square(trial_state)
+                lower_state = depth_first_search(trial_state)
                 if lower_state is not False and lower_state.check_solved():
                     return lower_state
         this_loops_start_state.set_invalid()
@@ -294,7 +386,7 @@ def sudoku_solver(sudoku):
         this_board_to_solve.set_invalid()
         returned_val = this_board_to_solve
     else:
-        returned_val = go_for_this_square(this_board_to_solve)
+        returned_val = depth_first_search(this_board_to_solve)
 
     return returned_val.get_board()
 
