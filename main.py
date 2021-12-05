@@ -127,7 +127,7 @@ def sudoku_solver(sudoku):
                                 triple_locations.append(counter)
                                 self.remove_naked_col(x_location, triple_locations, this_val)
                         counter += 1
-                row_array.append(this_val)
+                col_array.append(this_val)
 
         def remove_naked_overall(self):
             for y_location in range(0, 9):
@@ -181,29 +181,37 @@ def sudoku_solver(sudoku):
                                     triple_locations.append(counter)
                                     self.remove_naked_col(x_location, triple_locations, this_val)
                             counter += 1
-                    row_array.append(this_val)
+                    col_array.append(this_val)
+            for x_bias in [0, 3, 6]:
+                for y_bias in [0, 3, 6]:
+                    square_vals = set([])
+                    for y_val in range(0 + y_bias, 3 + y_bias):  # we are looping through each of the values in the square
+                        for x_val in range(0 + x_bias, 3 + x_bias):
+                            this_val = self.array_possible_values[y_location][x_location]
+
+
 
         def remove_naked_row(self, row_down, naked_locations, values):
-            naked_list = copy.deepcopy(values)
+            naked_list = set(copy.deepcopy(values))
             locations_without_pair = [0,1,2,3,4,5,6,7,8]
             for this_location in naked_locations:
                 locations_without_pair.remove(this_location)
 
             for x_val in locations_without_pair:
-                possible_values = list(self.array_possible_values[row_down][x_val])
+                possible_values = set(self.array_possible_values[row_down][x_val])
                 for this_check in naked_list:
                     if this_check in possible_values:
                         possible_values.remove(this_check)
                 self.array_possible_values[row_down][x_val] = list(possible_values)
 
         def remove_naked_col(self, col_across, pair_locations, values):
-            naked_list = copy.deepcopy(values)
+            naked_list = set(copy.deepcopy(values))
             locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
             for this_location in pair_locations:
                 locations_without_pair.remove(this_location)
 
             for y_val in locations_without_pair:
-                possible_values = list(self.array_possible_values[y_val][col_across])
+                possible_values = set(self.array_possible_values[y_val][col_across])
                 for this_check in naked_list:
                     if this_check in possible_values:
                         possible_values.remove(this_check)
