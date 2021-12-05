@@ -61,6 +61,7 @@ def sudoku_solver(sudoku):
             del self.overall_empty_squares_dict[location_to_string(
                 changed_location)]  # Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
+            self.remove_naked_specific()
 
         def get_board(self):
             return self.board
@@ -74,8 +75,61 @@ def sudoku_solver(sudoku):
 
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
+        def remove_naked_specific(self):
+            y_location = self.square_changed[0]
+            row_array = []
+            for x_location in range(0, 9):
+                this_val = self.array_possible_values[y_location][x_location]
+                if len(this_val) == 2:
+                    counter = 0
+                    for this_check in row_array:
+                        if this_val == this_check:
+                            pair_locations = [x_location,counter]
+                            self.remove_naked_row(y_location,pair_locations,this_val)
+                        counter += 1
+                elif len(this_val) == 3:
+                    counter = 0
+                    triple_locations = []
+                    found_two = False
+                    for this_check in row_array:
+                        if this_val == this_check:
+                            if found_two == False:
+                                triple_locations.append(x_location)
+                                triple_locations.append(counter)
+                                found_two = True
+                            elif found_two == True:
+                                triple_locations.append(counter)
+                                self.remove_naked_row(y_location, triple_locations, this_val)
+                        counter += 1
+                row_array.append(this_val)
+            x_location = self.square_changed[1]
+            col_array = []
+            for y_location in range(0, 9):
+                this_val = self.array_possible_values[y_location][x_location]
+                if len(this_val) == 2:
+                    counter = 0
+                    for this_check in col_array:
+                        if this_val == this_check:
+                            pair_locations = [y_location,counter]
+                            self.remove_naked_col(x_location,pair_locations,this_val)
+                        counter += 1
+                elif len(this_val) == 3:
+                    counter = 0
+                    triple_locations = []
+                    found_two = False
+                    for this_check in col_array:
+                        if this_val == this_check:
+                            if found_two == False:
+                                triple_locations.append(y_location)
+                                triple_locations.append(counter)
+                                found_two = True
+                            elif found_two == True:
+                                triple_locations.append(counter)
+                                self.remove_naked_col(x_location, triple_locations, this_val)
+                        counter += 1
+                row_array.append(this_val)
 
-        def remove_naked(self):
+        def remove_naked_overall(self):
             for y_location in range(0, 9):
                 row_array = []
                 for x_location in range(0, 9):
@@ -128,13 +182,10 @@ def sudoku_solver(sudoku):
                                     self.remove_naked_col(x_location, triple_locations, this_val)
                             counter += 1
                     row_array.append(this_val)
-            #todo add squares here
-
 
         def remove_naked_row(self, row_down, naked_locations, values):
             naked_list = copy.deepcopy(values)
             locations_without_pair = [0,1,2,3,4,5,6,7,8]
-            print(naked_locations)
             for this_location in naked_locations:
                 locations_without_pair.remove(this_location)
 
@@ -148,7 +199,6 @@ def sudoku_solver(sudoku):
         def remove_naked_col(self, col_across, pair_locations, values):
             naked_list = copy.deepcopy(values)
             locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-            print(pair_locations)
             for this_location in pair_locations:
                 locations_without_pair.remove(this_location)
 
@@ -227,14 +277,10 @@ def sudoku_solver(sudoku):
                         if this_val in col_vals:  # todo could be made more efficent?
                             return False  # same values in column so this sate is invalid
                         col_vals.append(this_val)
-            x_bias = 0
-            for y_bias in [0, 3, 6]:
-                if not self.check_square(y_bias, x_bias):
-                    return False
-            y_bias = 0
             for x_bias in [0, 3, 6]:
-                if not self.check_square(y_bias, x_bias):
-                    return False
+                for y_bias in [0, 3, 6]:
+                    if not self.check_square(y_bias, x_bias):
+                        return False
             return True
 
         #
@@ -381,7 +427,7 @@ def sudoku_solver(sudoku):
     this_board_to_solve = sudoku_board(sudoku, [0, 0], 0, create_3d_array([9, 9]),
                                        {"00": [0, 0]}, )  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
-    this_board_to_solve.remove_naked()
+    this_board_to_solve.remove_naked_overall()
     if not this_board_to_solve.is_valid_overall():  # we check wether the board is valid at the start, to avoid going through recursively when it is invalid
         this_board_to_solve.set_invalid()
         returned_val = this_board_to_solve
