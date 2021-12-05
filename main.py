@@ -1,4 +1,3 @@
-import copy
 
 import numpy as np
 import time
@@ -80,54 +79,53 @@ def sudoku_solver(sudoku):
             row_array = []
             for x_location in range(0, 9):
                 this_val = self.array_possible_values[y_location][x_location]
-                if len(this_val) == 2:
-                    counter = 0
-                    for this_check in row_array:
-                        if this_val == this_check:
-                            pair_locations = [x_location,counter]
-                            self.remove_naked_row(y_location,pair_locations,this_val)
-                        counter += 1
-                elif len(this_val) == 3:
+                length = len(this_val)
+                if length == 2 or length == 3:
                     counter = 0
                     triple_locations = []
                     found_two = False
+
                     for this_check in row_array:
                         if this_val == this_check:
-                            if found_two == False:
-                                triple_locations.append(x_location)
-                                triple_locations.append(counter)
-                                found_two = True
-                            elif found_two == True:
-                                triple_locations.append(counter)
-                                self.remove_naked_row(y_location, triple_locations, this_val)
+                            if length == 2:
+                                pair_locations = [x_location,counter]
+                                self.remove_naked_row(y_location,pair_locations,this_val)
+                            else:
+                                if found_two == False:
+                                    triple_locations.append(x_location)
+                                    triple_locations.append(counter)
+                                    found_two = True
+                                elif found_two == True:
+                                    triple_locations.append(counter)
+                                    self.remove_naked_row(y_location, triple_locations, this_val)
                         counter += 1
                 row_array.append(this_val)
+
             x_location = self.square_changed[1]
             col_array = []
             for y_location in range(0, 9):
                 this_val = self.array_possible_values[y_location][x_location]
-                if len(this_val) == 2:
-                    counter = 0
-                    for this_check in col_array:
-                        if this_val == this_check:
-                            pair_locations = [y_location,counter]
-                            self.remove_naked_col(x_location,pair_locations,this_val)
-                        counter += 1
-                elif len(this_val) == 3:
+                length = len(this_val)
+                if length == 2 or length == 3:
                     counter = 0
                     triple_locations = []
                     found_two = False
                     for this_check in col_array:
                         if this_val == this_check:
-                            if found_two == False:
-                                triple_locations.append(y_location)
-                                triple_locations.append(counter)
-                                found_two = True
-                            elif found_two == True:
-                                triple_locations.append(counter)
-                                self.remove_naked_col(x_location, triple_locations, this_val)
+                            if length == 2:
+                                pair_locations = [y_location,counter]
+                                self.remove_naked_col(x_location,pair_locations,this_val)
+                            else:
+                                if found_two == False:
+                                    triple_locations.append(y_location)
+                                    triple_locations.append(counter)
+                                    found_two = True
+                                elif found_two == True:
+                                    triple_locations.append(counter)
+                                    self.remove_naked_col(x_location, triple_locations, this_val)
                         counter += 1
                 col_array.append(this_val)
+
 
             y_bias, x_bias = workout_square_bias(self.square_changed)
             square_array = []
@@ -135,26 +133,24 @@ def sudoku_solver(sudoku):
             for y_location in range(0 + y_bias, 3 + y_bias):
                 for x_location in range(0 + x_bias, 3 + x_bias):
                     this_val = self.array_possible_values[y_location][x_location]
-                    if len(this_val) == 2:
-                        counter = 0
-                        for this_check in square_array:
-                            if this_val == this_check:
-                                pair_locations = [counter_overall, counter]
-                                self.remove_naked_square(y_bias, x_bias, pair_locations, this_val)
-                            counter += 1
-                    elif len(this_val) == 3:
+                    length = len(this_val)
+                    if length == 2 or length ==3:
                         counter = 0
                         triple_locations = []
                         found_two = False
                         for this_check in square_array:
                             if this_val == this_check:
-                                if found_two == False:
-                                    triple_locations.append(counter_overall)
-                                    triple_locations.append(counter)
-                                    found_two = True
-                                elif found_two == True:
-                                    triple_locations.append(counter)
-                                    self.remove_naked_square(y_bias, x_bias, triple_locations, this_val)
+                                if length ==2:
+                                    pair_locations = [counter_overall, counter]
+                                    self.remove_naked_square(y_bias, x_bias, pair_locations, this_val)
+                                else:
+                                    if found_two == False:
+                                        triple_locations.append(counter_overall)
+                                        triple_locations.append(counter)
+                                        found_two = True
+                                    elif found_two == True:
+                                        triple_locations.append(counter)
+                                        self.remove_naked_square(y_bias, x_bias, triple_locations, this_val)
                             counter += 1
                     square_array.append(this_val)
                     counter_overall += 1
@@ -232,7 +228,7 @@ def sudoku_solver(sudoku):
                     counter += 1
 
         def remove_naked_row(self, row_down, naked_locations, values):
-            naked_list = set(copy.deepcopy(values))
+            naked_list = set(values)
             locations_without_pair = [0,1,2,3,4,5,6,7,8]
             for this_location in naked_locations:
                 locations_without_pair.remove(this_location)
@@ -245,7 +241,7 @@ def sudoku_solver(sudoku):
                 self.array_possible_values[row_down][x_val] = list(possible_values)
 
         def remove_naked_col(self, col_across, pair_locations, values):
-            naked_list = set(copy.deepcopy(values))
+            naked_list = set(values)
             locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
             for this_location in pair_locations:
                 locations_without_pair.remove(this_location)
@@ -390,32 +386,37 @@ def sudoku_solver(sudoku):
             row_vals = set([])
             col_vals = set([])
             square_vals = set([])
-            board = np.copy(self.board)
-            board[location_check[0], location_check[1]] = value
+            self.board[location_check[0], location_check[1]] = value
             if location_check[0] == 7:
                 pass
 
-            for x_val in range(0, 9):  # checking whether the row is valid
-                this_val = board[location_check[0], x_val]
+            for y_x_val in range(0, 9):  # checking whether the row is valid
+                this_val = self.board[location_check[0], y_x_val]
                 if this_val != 0:
-                    if this_val in row_vals:  # todo could be made more efficent?
+                    if this_val in row_vals:
+                        self.board[location_check[0], location_check[1]] = 0
+
                         return False  # same values in row so this state invalid
                     row_vals.add(this_val)
+
             for y_val in range(0, 9):  # checking whether the column is valid
-                this_val = board[y_val, location_check[1]]
+                this_val = self.board[y_val, location_check[1]]
                 if this_val != 0:
-                    if this_val in col_vals:  # todo could be made more efficent?
+                    if this_val in col_vals:
+                        self.board[location_check[0], location_check[1]] = 0
                         return False  # same values in column so this state is invalid
                     col_vals.add(this_val)
             # used to work out what square we are in, and check the locations in this square
             y_bias, x_bias = workout_square_bias(location_check)
             for y_val in range(0 + y_bias, 3 + y_bias):
                 for x_val in range(0 + x_bias, 3 + x_bias):
-                    this_val = board[y_val, x_val]
+                    this_val = self.board[y_val, x_val]
                     if this_val != 0:
-                        if this_val in square_vals:  # todo could be made more efficent?
+                        if this_val in square_vals:
+                            self.board[location_check[0], location_check[1]] = 0
                             return False  # same values in square so this state is invalid
                         square_vals.add(this_val)
+            self.board[location_check[0], location_check[1]] = 0
             return True
 
         #
@@ -492,7 +493,7 @@ overall_start_time = time.process_time()
 
 def tests():
     import time
-    difficulties = ['very_easy', 'easy', 'medium', 'hard']  # todo re-add hard
+    difficulties = ['very_easy', 'easy', 'medium', 'hard']
 
     for difficulty in difficulties:
         print(f"Testing {difficulty} sudokus")
