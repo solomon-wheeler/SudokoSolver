@@ -129,6 +129,36 @@ def sudoku_solver(sudoku):
                         counter += 1
                 col_array.append(this_val)
 
+            y_bias, x_bias = workout_square_bias(self.square_changed)
+            square_array = []
+            counter_overall = 0
+            for y_location in range(0 + y_bias, 3 + y_bias):
+                for x_location in range(0 + x_bias, 3 + x_bias):
+                    this_val = self.array_possible_values[y_location][x_location]
+                    if len(this_val) == 2:
+                        counter = 0
+                        for this_check in square_array:
+                            if this_val == this_check:
+                                pair_locations = [counter_overall, counter]
+                                self.remove_naked_square(y_bias, x_bias, pair_locations, this_val)
+                            counter += 1
+                    elif len(this_val) == 3:
+                        counter = 0
+                        triple_locations = []
+                        found_two = False
+                        for this_check in square_array:
+                            if this_val == this_check:
+                                if found_two == False:
+                                    triple_locations.append(counter_overall)
+                                    triple_locations.append(counter)
+                                    found_two = True
+                                elif found_two == True:
+                                    triple_locations.append(counter)
+                                    self.remove_naked_square(y_bias, x_bias, triple_locations, this_val)
+                            counter += 1
+                    square_array.append(this_val)
+                    counter_overall += 1
+
         def remove_naked_overall(self):
             for y_location in range(0, 9):
                 row_array = []
@@ -182,14 +212,24 @@ def sudoku_solver(sudoku):
                                     self.remove_naked_col(x_location, triple_locations, this_val)
                             counter += 1
                     col_array.append(this_val)
-            for x_bias in [0, 3, 6]:
-                for y_bias in [0, 3, 6]:
-                    square_vals = set([])
-                    for y_val in range(0 + y_bias, 3 + y_bias):  # we are looping through each of the values in the square
-                        for x_val in range(0 + x_bias, 3 + x_bias):
-                            this_val = self.array_possible_values[y_location][x_location]
+            #Not including square check here, see read_me
 
 
+        def remove_naked_square(self, y_bias, x_bias, locations_to_skip, values):
+            naked_list = set(values)
+            counter = 0
+            for y_location in range(0 + y_bias, 3 + y_bias):
+                for x_location in range(0 + x_bias, 3 + x_bias):
+                    if counter not in locations_to_skip:
+
+                        possible_values = set(self.array_possible_values[y_location][x_location])
+                        # print(possible_values)
+                        for this_check in naked_list:
+                            if len(possible_values) != 0:
+                                if this_check in possible_values:
+                                    possible_values.remove(this_check)
+                        self.array_possible_values[y_location][x_location] = list(possible_values)
+                    counter += 1
 
         def remove_naked_row(self, row_down, naked_locations, values):
             naked_list = set(copy.deepcopy(values))
