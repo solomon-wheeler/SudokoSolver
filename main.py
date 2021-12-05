@@ -2,11 +2,11 @@ import numpy as np
 import time
 
 def sudoku_solver(sudoku):
+
     #
     # Creates an empty 3d array
     # Arguments: size ( array )
     #
-
     def create_3d_array(size):
         overall_array = []
         for y in range(0, size[0]):
@@ -52,7 +52,6 @@ def sudoku_solver(sudoku):
     # possible_values, this is a 3d array with empty squares filled with arrays of possible values for that squares (array)
     # last_empty_squares, empty squares from our last board (dictionary)
     #
-
     class sudoku_board():
 
         def __init__(self, board, changed_location, changed_value, possible_vals, last_empty_squares):
