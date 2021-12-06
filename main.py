@@ -1,3 +1,5 @@
+import functools
+
 import numpy as np
 import time
 from itertools import product # used for nested for loop implementation in list comprehension
@@ -44,7 +46,7 @@ def sudoku_solver(sudoku):
             self.overall_empty_squares_dict = last_empty_squares
             del self.overall_empty_squares_dict[f"{changed_location[0]}{changed_location[1]}"]  # Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
-            self.remove_naked_specific()
+            self.find_naked_specific()
 
         def get_board(self):
             return self.board
@@ -58,8 +60,7 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = [this_value_to_check for this_value_to_check in range(1,10) if self.is_valid_partial(this_empty_location, this_value_to_check)]
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
-        def hidden_singles_overall(self):
-
+        def hidden_singles(self):
             for y_location in range(0, 9):
                 times_found = [0, 0, 0, 0, 0, 0, 0, 0, 0]
                 last_location_found = [[], [], [], [], [], [], [], [], []]
@@ -101,7 +102,7 @@ def sudoku_solver(sudoku):
                             self.array_possible_values[location_of_single[0]][location_of_single[1]] = [counter]
 
 
-        def remove_naked_specific(self):
+        def find_naked_specific(self):
             y_location = self.square_changed[0]
             row_array = []
             for x_location in range(0, 9):
@@ -391,17 +392,19 @@ def sudoku_solver(sudoku):
             for x_val in range(0, 9):  # checking whether the row is valid
                 this_val = self.board[location_check[0], x_val]
                 if this_val != 0:
-                    if this_val in row_vals:
-                        self.board[location_check[0], location_check[1]] = 0
-                        return False  # same values in row so this state invalid
+                    if x_val != 0:
+                        if this_val in row_vals:
+                            self.board[location_check[0], location_check[1]] = 0
+                            return False  # same values in row so this state invalid
                     row_vals.add(this_val)
 
             for y_val in range(0, 9):  # checking whether the column is valid
                 this_val = self.board[y_val, location_check[1]]
                 if this_val != 0:
-                    if this_val in col_vals:
-                        self.board[location_check[0], location_check[1]] = 0
-                        return False  # same values in column so this state is invalid
+                    if y_val != 0:
+                        if this_val in col_vals:
+                            self.board[location_check[0], location_check[1]] = 0
+                            return False  # same values in column so this state is invalid
                     col_vals.add(this_val)
 
             self.board[location_check[0], location_check[1]] = 0
@@ -458,7 +461,7 @@ def sudoku_solver(sudoku):
                                        {"00": [0, 0]}, )  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
     this_board_to_solve.remove_naked_overall()
-    this_board_to_solve.hidden_singles_overall()
+    this_board_to_solve.hidden_singles()
 
     if not this_board_to_solve.is_valid_overall():  # we check wether the board is valid at the start, to avoid going through recursively when it is invalid
         this_board_to_solve.set_invalid()
