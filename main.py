@@ -536,7 +536,7 @@ overall_start_time = time.process_time()
 
 def tests():
     import time
-    difficulties = [ 'hard']
+    difficulties = ['very_easy', 'easy', 'medium', 'hard']
 
     for difficulty in difficulties:
         print(f"Testing {difficulty} sudokus")
