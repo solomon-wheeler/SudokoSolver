@@ -89,12 +89,10 @@ def sudoku_solver(sudoku):
                     for this_num in domain:
                         times_found[this_num - 1] += 1
                         last_location_found[this_num - 1] = [y_location, x_location]
-                counter = 1
-                for number_found in times_found:
+                for counter, number_found in enumerate(times_found,start =1):
                     if number_found == 1:
                         location_of_single = last_location_found[counter - 1]
                         self.array_possible_values[location_of_single[0]][location_of_single[1]] = list([counter])
-                    counter += 1
 
             for x_location in range(0, 9):
                 times_found = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -104,12 +102,10 @@ def sudoku_solver(sudoku):
                     for this_num in domain:
                         times_found[this_num - 1] += 1
                         last_location_found[this_num - 1] = [y_location, x_location]
-                counter = 1
-                for number_found in times_found:
+                for counter, number_found in enumerate(times_found,start =1):
                     if number_found == 1:
                         location_of_single = last_location_found[counter - 1]
                         self.array_possible_values[location_of_single[0]][location_of_single[1]] = list([counter])
-                    counter += 1
             return None
             times_found = [0, 0, 0, 0, 0, 0, 0, 0, 0]
             last_location_found = [[], [], [], [], [], [], [], [], []]
@@ -120,12 +116,10 @@ def sudoku_solver(sudoku):
                     for this_num in domain:
                         times_found[this_num - 1] += 1
                         last_location_found[this_num - 1] = [y_location, x_location]
-                counter = 1
-                for number_found in times_found:
+                for counter, number_found in enumerate(times_found,start =1):
                     if number_found == 1:
                         location_of_single = last_location_found[counter - 1]
                         self.array_possible_values[location_of_single[0]][location_of_single[1]] = [counter]
-                    counter += 1
 
 
         def remove_naked_specific(self):
@@ -135,13 +129,12 @@ def sudoku_solver(sudoku):
                 this_val = self.array_possible_values[y_location][x_location]
                 length = len(this_val)
                 if length == 2 or length == 3:
-                    counter = 0
                     triple_locations = []
                     found_two = False
 
-                    for this_check in row_array:
+                    for counter, this_check in enumerate(row_array):
                         if this_val == this_check:
-                            if found_two == True:
+                            if found_two:
                                 triple_locations.append(counter)
                                 self.remove_naked_row(y_location, triple_locations, this_val)
                             elif length == 2:
@@ -152,7 +145,6 @@ def sudoku_solver(sudoku):
                                 triple_locations.append(counter)
                                 found_two = True
 
-                        counter += 1
                 row_array.append(this_val)
 
             x_location = self.square_changed[1]
@@ -161,10 +153,9 @@ def sudoku_solver(sudoku):
                 this_val = self.array_possible_values[y_location][x_location]
                 length = len(this_val)
                 if length == 2 or length == 3:
-                    counter = 0
                     triple_locations = []
                     found_two = False
-                    for this_check in col_array:
+                    for counter, this_check in enumerate(col_array):
                         if this_val == this_check:
                             if found_two:
                                 triple_locations.append(counter)
@@ -177,7 +168,6 @@ def sudoku_solver(sudoku):
                                 triple_locations.append(counter)
                                 found_two = True
 
-                        counter += 1
                 col_array.append(this_val)
 
             y_bias, x_bias = workout_square_bias(self.square_changed)
@@ -188,10 +178,9 @@ def sudoku_solver(sudoku):
                     this_val = self.array_possible_values[y_location][x_location]
                     length = len(this_val)
                     if length == 2 or length == 3:
-                        counter = 0
                         triple_locations = []
                         found_two = False
-                        for this_check in square_array:
+                        for counter, this_check in enumerate(square_array):
                             if this_val == this_check:
                                 if found_two:
                                     triple_locations.append(counter)
@@ -204,7 +193,6 @@ def sudoku_solver(sudoku):
                                     triple_locations.append(counter)
                                     found_two = True
 
-                            counter += 1
                     square_array.append(this_val)
                     counter_overall += 1
 
@@ -215,11 +203,10 @@ def sudoku_solver(sudoku):
                     this_val = self.array_possible_values[y_location][x_location]
                     length = len(this_val)
                     if length == 2 or length == 3:
-                        counter = 0
                         triple_locations = []
                         found_two = False
 
-                        for this_check in row_array:
+                        for counter, this_check in enumerate(row_array):
                             if this_val == this_check:
                                 if found_two == True:
                                     triple_locations.append(counter)
@@ -231,7 +218,6 @@ def sudoku_solver(sudoku):
                                     triple_locations.append(x_location)
                                     triple_locations.append(counter)
                                     found_two = True
-                            counter += 1
                     row_array.append(this_val)
 
             for x_location in range(0, 9):
@@ -240,10 +226,9 @@ def sudoku_solver(sudoku):
                     this_val = self.array_possible_values[y_location][x_location]
                     length = len(this_val)
                     if length == 2 or length == 3:
-                        counter = 0
                         triple_locations = []
                         found_two = False
-                        for this_check in col_array:
+                        for counter, this_check in enumerate(col_array):
                             if this_val == this_check:
                                 if found_two:
                                     triple_locations.append(counter)
@@ -255,8 +240,6 @@ def sudoku_solver(sudoku):
                                     triple_locations.append(y_location)
                                     triple_locations.append(counter)
                                     found_two = True
-
-                            counter += 1
                     col_array.append(this_val)
 
         def remove_naked_square(self, y_bias, x_bias, locations_to_skip, values):
