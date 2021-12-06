@@ -79,6 +79,55 @@ def sudoku_solver(sudoku):
                 array_of_possible_values = self.work_out_possible_values(this_empty_location)
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
+        def hidden_singles_overall(self):
+
+            for y_location in range(0, 9):
+                times_found = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                last_location_found = [[], [], [], [], [], [], [], [], []]
+                for x_location in range(0, 9):
+                    domain = self.array_possible_values[y_location][x_location]
+                    for this_num in domain:
+                        times_found[this_num - 1] += 1
+                        last_location_found[this_num - 1] = [y_location, x_location]
+                counter = 1
+                for number_found in times_found:
+                    if number_found == 1:
+                        location_of_single = last_location_found[counter - 1]
+                        self.array_possible_values[location_of_single[0]][location_of_single[1]] = list([counter])
+                    counter += 1
+
+            for x_location in range(0, 9):
+                times_found = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                last_location_found = [[], [], [], [], [], [], [], [], []]
+                for y_location in range(0, 9):
+                    domain = self.array_possible_values[y_location][x_location]
+                    for this_num in domain:
+                        times_found[this_num - 1] += 1
+                        last_location_found[this_num - 1] = [y_location, x_location]
+                counter = 1
+                for number_found in times_found:
+                    if number_found == 1:
+                        location_of_single = last_location_found[counter - 1]
+                        self.array_possible_values[location_of_single[0]][location_of_single[1]] = list([counter])
+                    counter += 1
+            return None
+            times_found = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            last_location_found = [[], [], [], [], [], [], [], [], []]
+            y_bias, x_bias = workout_square_bias(self.square_changed)
+            for y_location in range(0 + y_bias, 3 + y_bias):  # we are looping through each of the values in the square
+                for x_location in range(0 + x_bias, 3 + x_bias):
+                    domain = self.array_possible_values[y_location][x_location]
+                    for this_num in domain:
+                        times_found[this_num - 1] += 1
+                        last_location_found[this_num - 1] = [y_location, x_location]
+                counter = 1
+                for number_found in times_found:
+                    if number_found == 1:
+                        location_of_single = last_location_found[counter - 1]
+                        self.array_possible_values[location_of_single[0]][location_of_single[1]] = [counter]
+                    counter += 1
+
+
         def remove_naked_specific(self):
             y_location = self.square_changed[0]
             row_array = []
@@ -469,6 +518,7 @@ def sudoku_solver(sudoku):
                                        {"00": [0, 0]}, )  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
     this_board_to_solve.remove_naked_overall()
+    this_board_to_solve.hidden_singles_overall()
 
     if not this_board_to_solve.is_valid_overall():  # we check wether the board is valid at the start, to avoid going through recursively when it is invalid
         this_board_to_solve.set_invalid()
@@ -486,7 +536,7 @@ overall_start_time = time.process_time()
 
 def tests():
     import time
-    difficulties = ['very_easy', 'easy', 'medium', 'hard']
+    difficulties = [ 'hard']
 
     for difficulty in difficulties:
         print(f"Testing {difficulty} sudokus")
