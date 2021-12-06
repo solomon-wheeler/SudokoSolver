@@ -1,4 +1,3 @@
-import functools
 
 import numpy as np
 import time
@@ -28,7 +27,7 @@ def sudoku_solver(sudoku):
 
     #
     # Class that is used to store our sudoku board, we create new instances of these for every node in our search tree
-    # Arguments :
+    # Parameters :
     # Board, state of current board (array)
     # changed_location, square that was changed to create this board (array)
     # changed_value, value of the square that was changed to create this board (integer)
@@ -48,12 +47,16 @@ def sudoku_solver(sudoku):
                 f"{changed_location[0]}{changed_location[1]}"]  # Deleting the value we have just filled from our empty squares list, since it is no longer empty
             self.take_out_possible_values()
             self.find_naked_specific()
-
+        #
+        # Returns the board from our object
+        #
         def get_board(self):
             return self.board
-
+        #
+        # first time we run we are just finding all zeros and working out there possible values, by going through each value and checking if it is valid
+        #
         def create_possible_values(
-                self):  # first time we run we are just finding all zeros and working out there possible values, by going through each value and checking if it is valid
+                self):
             possible_empty_squares = [[y, x] for y, x in product(range(0, 9), range(0, 9)) if self.board[y][x] == 0]
 
             for this_empty_location in possible_empty_squares:
@@ -63,6 +66,9 @@ def sudoku_solver(sudoku):
                                             self.is_valid_partial(this_empty_location, this_value_to_check)]
                 self.array_possible_values[this_empty_location[0]][this_empty_location[1]] = array_of_possible_values
 
+        #
+        # This finds loops through every unit in the board and checks for hidden singles, if any are found it replaces there domain with the hidden single
+        #
         def hidden_singles(self):
             for y_location in range(0, 9):
                 times_found = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -105,6 +111,9 @@ def sudoku_solver(sudoku):
                             location_of_single = last_location_found[counter - 1]
                             self.array_possible_values[location_of_single[0]][location_of_single[1]] = [counter]
 
+        #
+        # A function that loops through the units that have been changed to create this cell and searches for naked pairs/triples
+        #
         def find_naked_specific(self):
             y_location = self.square_changed[0]
             row_array = []
@@ -178,7 +187,10 @@ def sudoku_solver(sudoku):
                     square_array.append(this_val)
                     counter_overall += 1
 
-        def remove_naked_overall(self):
+        #
+        # A function that loops through the every unit inthe board and searches for naked pairs/triples
+        #
+        def find_naked_overall(self):
             for y_location in range(0, 9):
                 row_array = []
                 for x_location in range(0, 9):
@@ -223,7 +235,14 @@ def sudoku_solver(sudoku):
                                     triple_locations.append(counter)
                                     found_two = True
                     col_array.append(this_val)
-
+        #
+        # Searches through every variable in the square except those with the naked group and removes the values from the naked group
+        # Parameters:
+        # y_bias (integer)
+        # x_bias (integer)
+        # locations_to_skip (array)
+        # values (array)
+        #
         def remove_naked_square(self, y_bias, x_bias, locations_to_skip, values):
             naked_list = set(values)
             counter = 0
@@ -239,6 +258,13 @@ def sudoku_solver(sudoku):
                         self.array_possible_values[y_location][x_location] = list(possible_values)
                     counter += 1
 
+        #
+        # Searches through every variable in the row except those with the naked group and removes the values from the naked group
+        # Parameters:
+        # row_down (integer)
+        # naked_locations (array)
+        # values (array)
+        #
         def remove_naked_row(self, row_down, naked_locations, values):
             naked_list = set(values)
             locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -252,6 +278,13 @@ def sudoku_solver(sudoku):
                         possible_values.remove(this_check)
                 self.array_possible_values[row_down][x_val] = list(possible_values)
 
+        #
+        # Searches through every variable in the column except those with the naked group and removes the values from the naked group
+        # Parameters:
+        # row_down (integer)
+        # naked_locations (array)
+        # values (array)
+        #
         def remove_naked_col(self, col_across, pair_locations, values):
             naked_list = set(values)
             locations_without_pair = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -369,8 +402,13 @@ def sudoku_solver(sudoku):
         #
         def get_pos_values(self, location):
             return self.array_possible_values[location[0]][location[1]]
-
-        def is_valid_partial(self, location_check, value):  # checks whether partial values for a new state are valid
+        #
+        # checks whether partial states are valid by checking for constraints that are not satisfied
+        # Arguments:
+        # Location_check (array)
+        # value (integer)
+        #
+        def is_valid_partial(self, location_check, value):
             row_vals = set([])
             col_vals = set([])
             square_vals = set([])
@@ -458,7 +496,7 @@ def sudoku_solver(sudoku):
     this_board_to_solve = sudoku_board(sudoku, [0, 0], 0, [[[] for y in range(9)] for x in range(9)],
                                        {"00": [0, 0]}, )  # add a dictionary so our empty square can be removed in setup
     this_board_to_solve.create_possible_values()
-    this_board_to_solve.remove_naked_overall()
+    this_board_to_solve.find_naked_overall()
     this_board_to_solve.hidden_singles()
 
     if not this_board_to_solve.is_valid_overall():  # we check wether the board is valid at the start, to avoid going through recursively when it is invalid
